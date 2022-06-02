@@ -19,11 +19,11 @@ class CheckRole
         $roles = explode(':', $role);
 
         foreach($roles as $role) {
-            if($request->user()->role == $role) {
+            if($request->user()->userRole->role->name == $role) {
                 return $next($request);
             }
         }
-        
+
         $notify[] = ['error', 'Error Code : 404 Not Found'];
         return redirect('dashboard')->withNotify($notify);
     }

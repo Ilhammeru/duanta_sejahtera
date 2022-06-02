@@ -1,4 +1,8 @@
 <?php
+
+use App\Http\Controllers\Master\DivisionController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,10 +32,6 @@ Route::get('/template/profile', function() {
 Route::post('/logout', 'Auth\LoginController@logout')->name('logout');
 Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
 Route::post('/login', 'Auth\LoginController@login')->name('login');
-Route::get('/dashboard', function() {
-    $pageTitle = "Dashboard";
-    return view('dashboard', compact('pageTitle'));
-})->name('dashboard');
 
 Route::get('/register', function() {
     return view('register');
@@ -46,3 +46,28 @@ Route::get('/password-email', function() {
 Route::get('/password-request', function() {
     return 'password request';
 })->name('password.request');
+
+Route::group(['middleware' => 'auth'], function() {
+    Route::get('/dashboard', function() {
+        $pageTitle = "Dashboard";
+        $auth = User::with([
+            'userRole' => function($query) {
+                $query->select('user_id', 'role_id', 'id');
+            },
+            'userRole.role' => function($query) {
+                $query->select('id', 'name', 'slug');
+            }
+        ])
+            ->find(Auth::id());
+        return view('dashboard', compact('pageTitle', 'auth'));
+    })->name('dashboard');
+
+    // *************************************** MASTER ********************************* //
+    // begin::division
+    Route::get('/division', [DivisionController::class, 'index'])->name('division.index');
+    Route::get('/division/json', [DivisionController::class, 'json'])->name('division.json');
+    Route::post('/division/store', [DivisionController::class, 'store'])->name('division.store');
+    Route::put('/division/update/{id}', [DivisionController::class, 'update'])->name('division.update');
+    // end::division
+});
+

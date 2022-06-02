@@ -19,12 +19,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('email');
             $table->text('password');
-            $table->integer('phone');
+            $table->string('phone');
             $table->date('birth_date')->nullable();
-            $table->timestamp('date_in');
-            $table->integer('division_id');
-            $table->text('photo');
-            $table->string('identity_number');
+            $table->timestamp('date_in')->nullable();
+            $table->integer('division_id')->nullable();
+            $table->text('photo')->nullable();
+            $table->string('identity_number')->nullable();
             $table->boolean('status');
             $table->timestamp('last_login')->default(Carbon::now());
             $table->timestamps();
