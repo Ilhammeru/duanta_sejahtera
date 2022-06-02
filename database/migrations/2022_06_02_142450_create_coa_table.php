@@ -13,11 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('services_', function (Blueprint $table) {
+        Schema::create('coa', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('price');
-            $table->timestamp('deleted_at')->nullable();
+            $table->string('code');
+            $table->integer('account_type_id');
+            $table->boolean('status')->default(TRUE);
+            $table->integer('balance')->default('0');
             $table->timestamps();
         });
     }
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('services_');
+        Schema::dropIfExists('coa');
     }
 };

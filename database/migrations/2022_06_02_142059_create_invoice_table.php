@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,18 +14,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('booking_in', function (Blueprint $table) {
+        Schema::create('invoice', function (Blueprint $table) {
             $table->id();
             $table->integer('customer_id');
-            $table->string('container_number');
-            $table->string('number_plate');
-            $table->string('transport_company');
-            $table->date('date_in');
-            $table->integer('price');
-            $table->json('service_id');
+            $table->date('date_create')->default(Carbon::now());
             $table->integer('billing_type_id');
-            $table->integer('marketing_id');
-            $table->boolean('is_complete');
+            $table->string('invoice_number');
+            $table->text('reference')->nullable();
+            $table->integer('service_id');
+            $table->text('description')->nullable();
+            $table->integer('qty_container');
+            $table->float('discount')->nullable();
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }
@@ -36,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('booking_in');
+        Schema::dropIfExists('invoice');
     }
 };

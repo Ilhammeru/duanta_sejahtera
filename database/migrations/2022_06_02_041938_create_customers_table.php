@@ -17,13 +17,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('address')->nullable();
-            $table->integer('phone',12);
+            $table->integer('phone');
             $table->integer('district');
             $table->integer('city');
             $table->integer('province');
             $table->string('npwp')->nullable();
             $table->string('pic_name')->nullable();
-            $table->integer('pic_phone', 12)->nullable();
+            $table->integer('pic_phone')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
