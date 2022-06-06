@@ -5,10 +5,10 @@
 <div class="card card-flush mb-3">
     <div class="card-body p-4">
         <div class="text-end">
-            <button class="btn btn-light-primary" onclick="addDivision()">
+            <a class="btn btn-light-primary" href="{{ route('user.create') }}">
                 <i class="fa fa-plus"></i>
-                Tambah Divisi
-            </button>
+                Tambah User
+            </a>
         </div>
     </div>
 </div>
@@ -20,12 +20,15 @@
     <div class="card-body pt-4">
 
         <!--begin::Table-->
-        <table class="table align-middle table-row-dashed fs-6 gy-5 mb-0 table_prospect_unique" id="dt_table">
+        <table class="table align-middle table-row-dashed fs-6 gy-5 mb-0" id="dt_table">
             <!--begin::Table head-->
             <thead>
                 <!--begin::Table row-->
                 <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                     <th>Nama</th>
+                    <th>Email</th>
+                    <th>Divisi</th>
+                    <th>Lama Bekerja</th>
                     <th></th>
                 </tr>
                 <!--end::Table row-->
@@ -42,38 +45,6 @@
     <!--end::Card body-->
 </div>
 <!--end::Card-->
-
-{{-- begin::Modal --}}
-<div class="modal fade" tabindex="-1" id="modalDivision">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"></h5>
-
-                <!--begin::Close-->
-                <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
-                    <span class="svg-icon svg-icon-2x"></span>
-                </div>
-                <!--end::Close-->
-            </div>
-
-            <form action="" id="formDivision">
-                <div class="modal-body">
-                    <div class="form-group mb-5 row">
-                        <label for="divisionName" class="col-form-label">Nama</label>
-                        <input type="text" class="form-control" name="name" id="divisionName">
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button class="btn btn-primary" type="button" id="actionDivision">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{{-- end::Modal --}}
 @endsection
 
 @push('scripts')
@@ -87,6 +58,12 @@
     var _columns = [{
         data: "name"
     }, {
+        data: "email"
+    }, {
+        data: "division"
+    }, {
+        data: "work_time"
+    }, {
         data: "action"
     }];
 
@@ -95,38 +72,39 @@
         processing: true,
         serverSide: true,
         scrollX: true,
-        ajax: "{{ route('division.json') }}",
+        ajax: "{{ route('user.json') }}",
         columns: _columns,
     });
 
     function addDivision() {
-        $('#modalDivision').modal('show');
+        $('#modalRole').modal('show');
         $('.modal-title').text('Tambah Divisi');
-        $('#actionDivision').attr('onclick', 'save()');
-        $('#divisionName').val('');
+        $('#actionRole').attr('onclick', 'save()');
+        $('#roleName').val('');
     }
 
     function edit(id) {
         $.ajax({
             type: "GET",
-            url: "{{ url('/division/detail/') }}" + "/" + id,
+            url: "{{ url('/roles/') }}" + "/" + id,
             dataType: 'json',
             error: function(err) {
 
             },
             success: function(res){
-                $('#divisionName').val(res.data.name);
-                $('#modalDivision').modal('show');
+                console.log(res);
+                $('#roleName').val(res.data.name);
+                $('#modalRole').modal('show');
                 $('.modal-title').text('Edit Divisi');
-                $('#actionDivision').attr('onclick', 'editDivision('+ id +')');
+                $('#actionRole').attr('onclick', 'editDivision('+ id +')');
             }
         })
     }
 
     function editDivision(id) {
-        let data = $('#formDivision').serialize();
-        let elem = $('#actionDivision');
-        let url = "{{ url('/division/update') }}" + "/" + id;
+        let data = $('#formRole').serialize();
+        let elem = $('#actionRole');
+        let url = "{{ url('/roles') }}" + "/" + id;
         $.ajax({
             type: "PUT",
             url: url,
@@ -139,7 +117,7 @@
             success: function(res) {
                 elem.attr('disabled', false);
                 elem.text('Simpan');
-                $('#modalDivision').modal('hide');
+                $('#modalRole').modal('hide');
                 iziToast['success']({
                     message: 'Berhasil menyimpan data',
                     position: "topRight"
@@ -158,12 +136,12 @@
     }
 
     function save() {
-        let data = $('#formDivision').serialize();
-        let elem = $('#actionDivision');
+        let data = $('#formRole').serialize();
+        let elem = $('#actionRole');
 
         $.ajax({
             type: "POST",
-            url: "{{ route('division.store') }}",
+            url: "{{ route('roles.store') }}",
             data: data,
             beforeSend: function() {
                 elem.attr('disabled', true);
@@ -172,7 +150,7 @@
             success: function(res) {
                 elem.attr('disabled', false);
                 elem.text('Simpan');
-                $('#modalDivision').modal('hide');
+                $('#modalRole').modal('hide');
                 iziToast['success']({
                     message: 'Berhasil menyimpan data',
                     position: "topRight"
@@ -183,8 +161,60 @@
                 elem.attr('disabled', false);
                 elem.text('Simpan');
                 let error = err.responseJSON.data.error;
-                iziToast['error']({
-                    message: error,
+                if (error) {
+                    iziToast['error']({
+                        message: error,
+                        position: "topRight"
+                    });
+                } else {
+                    iziToast['error']({
+                        message: err,
+                        position: "topRight"
+                    });
+                }
+            }
+        })
+    }
+
+    function deleteUser(id) {
+        Swal.fire({
+            title: 'Apakah anda yakin ingin menghapus data ini?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Ya!',
+            denyButtonText: `Batalkan`,
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url('/user/') }}" + '/' + id,
+                    dataType: 'json',
+                    error: function(err) {
+                        console.log(err);
+                        if (err.responseJSON.message == 'FAILED') {
+                            iziToast['error']({
+                                message: err.responseJSON.data.error,
+                                position: "topRight"
+                            });
+                        } else {
+                            iziToast['error']({
+                                message: err.responseJSON.message,
+                                position: "topRight"
+                            });
+                        }
+                    },
+                    success: function(res) {
+                        iziToast['success']({
+                            message: 'User berhasil di hapus',
+                            position: "topRight"
+                        });
+                        tables.ajax.reload();
+                    }
+                })
+            } else if (result.isDenied) {
+                iziToast['success']({
+                    message: 'Hapus user di batalkan',
                     position: "topRight"
                 });
             }

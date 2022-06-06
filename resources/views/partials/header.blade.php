@@ -3,8 +3,8 @@
     <!--begin::Brand-->
     <div class="header-brand">
         <!--begin::Logo-->
-        <a href="../../demo8/dist/index.html">
-            <img alt="Logo" src="{{ asset('images/logo-1-dark.svg') }}" class="h-25px h-lg-25px" />
+        <a href="#" class="text-white" style="font-size: 18px;">
+            Sistem Depo Container
         </a>
         <!--end::Logo-->
         <!--begin::Aside minimize-->

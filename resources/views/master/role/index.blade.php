@@ -7,7 +7,7 @@
         <div class="text-end">
             <button class="btn btn-light-primary" onclick="addDivision()">
                 <i class="fa fa-plus"></i>
-                Tambah Divisi
+                Tambah Role
             </button>
         </div>
     </div>
@@ -20,7 +20,7 @@
     <div class="card-body pt-4">
 
         <!--begin::Table-->
-        <table class="table align-middle table-row-dashed fs-6 gy-5 mb-0 table_prospect_unique" id="dt_table">
+        <table class="table align-middle table-row-dashed fs-6 gy-5 mb-0" id="dt_table">
             <!--begin::Table head-->
             <thead>
                 <!--begin::Table row-->
@@ -44,7 +44,7 @@
 <!--end::Card-->
 
 {{-- begin::Modal --}}
-<div class="modal fade" tabindex="-1" id="modalDivision">
+<div class="modal fade" tabindex="-1" id="modalRole">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -57,17 +57,17 @@
                 <!--end::Close-->
             </div>
 
-            <form action="" id="formDivision">
+            <form action="" id="formRole">
                 <div class="modal-body">
                     <div class="form-group mb-5 row">
-                        <label for="divisionName" class="col-form-label">Nama</label>
-                        <input type="text" class="form-control" name="name" id="divisionName">
+                        <label for="roleName" class="col-form-label">Nama</label>
+                        <input type="text" class="form-control" name="name" id="roleName">
                     </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                    <button class="btn btn-primary" type="button" id="actionDivision">Simpan</button>
+                    <button class="btn btn-primary" type="button" id="actionRole">Simpan</button>
                 </div>
             </form>
         </div>
@@ -95,38 +95,39 @@
         processing: true,
         serverSide: true,
         scrollX: true,
-        ajax: "{{ route('division.json') }}",
+        ajax: "{{ route('roles.json') }}",
         columns: _columns,
     });
 
     function addDivision() {
-        $('#modalDivision').modal('show');
+        $('#modalRole').modal('show');
         $('.modal-title').text('Tambah Divisi');
-        $('#actionDivision').attr('onclick', 'save()');
-        $('#divisionName').val('');
+        $('#actionRole').attr('onclick', 'save()');
+        $('#roleName').val('');
     }
 
     function edit(id) {
         $.ajax({
             type: "GET",
-            url: "{{ url('/division/detail/') }}" + "/" + id,
+            url: "{{ url('/roles/') }}" + "/" + id,
             dataType: 'json',
             error: function(err) {
 
             },
             success: function(res){
-                $('#divisionName').val(res.data.name);
-                $('#modalDivision').modal('show');
+                console.log(res);
+                $('#roleName').val(res.data.name);
+                $('#modalRole').modal('show');
                 $('.modal-title').text('Edit Divisi');
-                $('#actionDivision').attr('onclick', 'editDivision('+ id +')');
+                $('#actionRole').attr('onclick', 'editDivision('+ id +')');
             }
         })
     }
 
     function editDivision(id) {
-        let data = $('#formDivision').serialize();
-        let elem = $('#actionDivision');
-        let url = "{{ url('/division/update') }}" + "/" + id;
+        let data = $('#formRole').serialize();
+        let elem = $('#actionRole');
+        let url = "{{ url('/roles') }}" + "/" + id;
         $.ajax({
             type: "PUT",
             url: url,
@@ -139,7 +140,7 @@
             success: function(res) {
                 elem.attr('disabled', false);
                 elem.text('Simpan');
-                $('#modalDivision').modal('hide');
+                $('#modalRole').modal('hide');
                 iziToast['success']({
                     message: 'Berhasil menyimpan data',
                     position: "topRight"
@@ -158,12 +159,12 @@
     }
 
     function save() {
-        let data = $('#formDivision').serialize();
-        let elem = $('#actionDivision');
+        let data = $('#formRole').serialize();
+        let elem = $('#actionRole');
 
         $.ajax({
             type: "POST",
-            url: "{{ route('division.store') }}",
+            url: "{{ route('roles.store') }}",
             data: data,
             beforeSend: function() {
                 elem.attr('disabled', true);
@@ -172,7 +173,7 @@
             success: function(res) {
                 elem.attr('disabled', false);
                 elem.text('Simpan');
-                $('#modalDivision').modal('hide');
+                $('#modalRole').modal('hide');
                 iziToast['success']({
                     message: 'Berhasil menyimpan data',
                     position: "topRight"
@@ -183,10 +184,17 @@
                 elem.attr('disabled', false);
                 elem.text('Simpan');
                 let error = err.responseJSON.data.error;
-                iziToast['error']({
-                    message: error,
-                    position: "topRight"
-                });
+                if (error) {
+                    iziToast['error']({
+                        message: error,
+                        position: "topRight"
+                    });
+                } else {
+                    iziToast['error']({
+                        message: err,
+                        position: "topRight"
+                    });
+                }
             }
         })
     }

@@ -86,14 +86,3 @@ if (!function_exists('generateRandomNumber')) {
         return $randomString;
     }
 }
-
-if (!function_exists('getSetting')) {
-    function getSetting($name){
-        $result = Setting::where('name', $name)->first();
-        if(!$result){
-            return NULL;
-        } else {
-            return $result->value;
-        }
-    }
-}

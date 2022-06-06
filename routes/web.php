@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Master\DivisionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 Route::get('/user', function() {
     $pageTitle = "Template User";
@@ -47,7 +49,7 @@ Route::get('/password-request', function() {
     return 'password request';
 })->name('password.request');
 
-Route::group(['middleware' => 'auth'], function() {
+Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::get('/dashboard', function() {
         $pageTitle = "Dashboard";
         $auth = User::with([
@@ -68,6 +70,18 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('/division/json', [DivisionController::class, 'json'])->name('division.json');
     Route::post('/division/store', [DivisionController::class, 'store'])->name('division.store');
     Route::put('/division/update/{id}', [DivisionController::class, 'update'])->name('division.update');
+    Route::get('/division/detail/{id}', [DivisionController::class, 'detail'])->name('division.detail');
     // end::division
+
+    // *************************************** USER MANAGEMENT ********************************* //
+    // begin::role
+    Route::get('/roles/json', [RoleController::class, 'json'])->name('roles.json');
+    Route::resource('roles', RoleController::class);
+    // end::role
+    // begin::user
+    Route::get('/user/json', [UserController::class, 'json'])->name('user.json');
+    Route::post('/user/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::resource('user', UserController::class);
+    // end::user
 });
 

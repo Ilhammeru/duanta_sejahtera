@@ -37,13 +37,19 @@ class User extends Authenticatable
         'password'
     ];
 
-    public function UserRole(): HasOne {
-        return $this->hasOne(UserRole::class, 'id');
+    public function UserRole(): HasOne
+    {
+        return $this->hasOne(UserRole::class, 'user_id', 'id');
     }
 
     public function district()
     {
         return $this->belongsTo(District::class, 'district_id');
+    }
+
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class, 'division_id');
     }
 
 }

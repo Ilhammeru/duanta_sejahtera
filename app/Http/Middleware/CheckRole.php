@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -18,13 +19,14 @@ class CheckRole
     {
         $roles = explode(':', $role);
 
+        $dataRole = User::with('userRole.role')->find($request->user()->id);
         foreach($roles as $role) {
-            if($request->user()->userRole->role->name == $role) {
+            if(strtolower($dataRole->userRole->role->name) == strtolower($role)) {
                 return $next($request);
             }
         }
 
         $notify[] = ['error', 'Error Code : 404 Not Found'];
-        return redirect('dashboard')->withNotify($notify);
+        return redirect()->route('welcome')->withNotify($notify);
     }
 }

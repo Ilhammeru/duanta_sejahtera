@@ -4,22 +4,28 @@ namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\Division;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
 class DivisionController extends Controller
 {
     public function index() {
         $pageTitle = 'Divisi';
-        return view('master.division.index', compact('pageTitle'));
+        $user = User::with('userRole.role')->find(Auth::user()->id);
+        return view('master.division.index', compact('pageTitle', 'user'));
     }
 
     public function json() {
         $data = Division::orderBy('id', 'desc')->get();
         return DataTables::of($data)
+            ->editColumn('name', function($data) {
+                return ucwords($data->name);
+            })
             ->addColumn('action', function ($data) {
-                return '<span onclick="editDivision('. $data->id .')" class="text-info me-4"><i class="fas fa-edit"></i></span>
+                return '<span onclick="edit('. $data->id .')" class="text-info me-4"><i class="fas fa-edit"></i></span>
                 <span class="text-info" id="deleteDivision"><i class="fas fa-trash"></i></span>';
             })
             ->rawColumns(['action'])
@@ -28,7 +34,7 @@ class DivisionController extends Controller
 
     public function store(Request $request) {
         $data = [
-            'name' => $request->name
+            'name' => strtolower($request->name)
         ];
 
         try {
@@ -40,6 +46,20 @@ class DivisionController extends Controller
     }
 
     public function update(Request $request, $id) {
-        return sendResponse($id, 'SUCCESS', 201);
+        $name = $request->name;
+        try {
+            $division = Division::updateOrCreate(
+                ['id' => $id],
+                ['name' => strtolower($name)]
+            );
+            return sendResponse($division, 'SUCCESS', 201);
+        } catch (\Throwable $th) {
+            return sendResponse(['data' => ['error' => $th->getMessage()]], 'FAILED', 500);
+        }
+    }
+
+    public function detail($id) {
+        $data = Division::find($id);
+        return sendResponse(['name' => $data->name], 'SUCCESS', 201);
     }
 }
