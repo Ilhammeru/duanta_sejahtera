@@ -1,3 +1,9 @@
+@php
+    $user = Auth::user();
+    $split = explode(' ', $user->name);
+    $name = count($split) > 1 ? ucwords($split[0] . ' ' . $split[1]) : ucwords($split[0]);
+@endphp
+
 <!--begin::Aside-->
 <div id="kt_aside" class="aside" data-kt-drawer="true" data-kt-drawer-name="aside" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_aside_mobile_toggle">
     <!--begin::Aside Toolbarl-->
@@ -16,10 +22,10 @@
                     <!--begin::Info-->
                     <div class="flex-grow-1 me-2">
                         <!--begin::Username-->
-                        <a href="#" class="text-white text-hover-primary fs-6 fw-bold">User</a>
+                        <a href="#" class="text-white text-hover-primary fs-6 fw-bold"></a>
                         <!--end::Username-->
                         <!--begin::Description-->
-                        <span class="text-gray-600 fw-bold d-block fs-8 mb-1">User</span>
+                        <span class="text-gray-600 fw-bold d-block fs-8 mb-1">{{ $name }}</span>
                         <!--end::Description-->
                         <!--begin::Label-->
                         <div class="d-flex align-items-center text-success fs-9">
@@ -52,9 +58,9 @@
                                     <!--end::Avatar-->
                                     <!--begin::Username-->
                                     <div class="d-flex flex-column">
-                                        <div class="fw-bolder d-flex align-items-center fs-5">User
+                                        <div class="fw-bolder d-flex align-items-center fs-5">{{ $name }}
                                         <span class="badge badge-light-success fw-bolder fs-8 px-2 py-1 ms-2">Pro</span></div>
-                                        <a href="#" class="fw-bold text-muted text-hover-primary fs-7">user@gmail.com</a>
+                                        <a href="#" class="fw-bold text-muted text-hover-primary fs-7">{{ $user->email }}</a>
                                     </div>
                                     <!--end::Username-->
                                 </div>
@@ -119,7 +125,7 @@
                         <span class="menu-title">Dashboard</span>
                     </a>
                 </div>
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow(['template.user']) }}">
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow(['division.index']) }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <!--begin::Svg Icon | path: assets/media/icons/duotune/communication/com014.svg-->
@@ -131,16 +137,16 @@
                             </svg>
                             <!--end::Svg Icon-->
                         </span>
-                        <span class="menu-title">Pengguna</span>
+                        <span class="menu-title">Master Data</span>
                         <span class="menu-arrow"></span>
                     </span>
                     <div class="menu-sub menu-sub-accordion">
                         <div class="menu-item">
-                            <a class="menu-link {{ menuActive('template.user') }}" href="{{ route('template.user') }}">
+                            <a class="menu-link {{ menuActive(['division.index']) }}" href="{{ route('division.index') }}">
                                 <span class="menu-bullet">
                                     <span class="bullet bullet-dot"></span>
                                 </span>
-                                <span class="menu-title">User</span>
+                                <span class="menu-title">Divisi</span>
                             </a>
                         </div>
                     </div>

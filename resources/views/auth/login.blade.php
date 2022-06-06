@@ -30,7 +30,7 @@
                 <label class="form-label fs-6 fw-bolder text-dark">Username</label>
                 <!--end::Label-->
                 <!--begin::Input-->
-                <input class="form-control form-control-lg @error('username') is-invalid @enderror" value="{{ old('username') }}" type="text" id="username" name="username" autocomplete="off" required/>
+                <input class="form-control form-control-lg @error('email') is-invalid @enderror" value="{{ old('email') }}" type="text" id="username" name="email" autocomplete="off" required/>
                 <!--end::Input-->
             </div>
             <!--end::Input group-->
