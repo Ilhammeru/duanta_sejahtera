@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\UserRole;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -37,7 +38,7 @@ class RoleController extends Controller
             })
             ->addColumn('action', function ($data) {
                 return '<span onclick="edit('. $data->id .')" class="text-info me-4"><i class="fas fa-edit"></i></span>
-                <span class="text-info" id="deleteRole"><i class="fas fa-trash"></i></span>';
+                <span class="text-info" onclick="deleteRole('. $data->id .')"><i class="fas fa-trash"></i></span>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -128,6 +129,17 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            $role = UserRole::select('id')->where('role_id', $id)->first();
+            if (!$role) {
+                $delete = Role::where('id', $id)->delete();
+
+                return sendResponse($delete, 'SUCCESS', '201');
+            }
+            return sendResponse(['error' => 'Masih ada user yang menggunakan role ini'], 'FOREIGN_FAILED', 201);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return sendResponse(['error' => $th->getMessage()], 'FAILED', 500);
+        }
     }
 }

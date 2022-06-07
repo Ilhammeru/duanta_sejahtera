@@ -26,7 +26,7 @@ class DivisionController extends Controller
             })
             ->addColumn('action', function ($data) {
                 return '<span onclick="edit('. $data->id .')" class="text-info me-4"><i class="fas fa-edit"></i></span>
-                <span class="text-info" id="deleteDivision"><i class="fas fa-trash"></i></span>';
+                <span class="text-info" onclick="deleteDivision('. $data->id .')"><i class="fas fa-trash"></i></span>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -61,5 +61,20 @@ class DivisionController extends Controller
     public function detail($id) {
         $data = Division::find($id);
         return sendResponse(['name' => $data->name], 'SUCCESS', 201);
+    }
+
+    public function destroy($id) {
+        try {
+            $user = User::select('id')->where('division_id', $id)->first();
+            if (!$user) {
+                $delete = Division::where('id', $id)->delete();
+
+                return sendResponse($delete, 'SUCCESS', '201');
+            }
+            return sendResponse(['error' => 'Masih ada user yang menggunakan divisi ini'], 'FOREIGN_FAILED', 201);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return sendResponse(['error' => $th->getMessage()], 'FAILED', 500);
+        }
     }
 }

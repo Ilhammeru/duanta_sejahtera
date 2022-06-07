@@ -198,5 +198,57 @@
             }
         })
     }
+
+    function deleteRole(id) {
+        Swal.fire({
+            title: 'Apakah anda yakin ingin menghapus data ini?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Ya!',
+            denyButtonText: `Batalkan`,
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url('/roles/') }}" + '/' + id,
+                    dataType: 'json',
+                    error: function(err) {
+                        console.log(err);
+                        if (err.responseJSON.message == 'FAILED') {
+                            iziToast['error']({
+                                message: err.responseJSON.data.error,
+                                position: "topRight"
+                            });
+                        } else {
+                            iziToast['error']({
+                                message: err.responseJSON.message,
+                                position: "topRight"
+                            });
+                        }
+                    },
+                    success: function(res) {
+                        if (res.message == 'FOREIGN_FAILED') {
+                            iziToast['error']({
+                                message: res.data.error,
+                                position: "topRight"
+                            });    
+                        } else {
+                            iziToast['success']({
+                                message: 'User berhasil di hapus',
+                                position: "topRight"
+                            });
+                        }
+                        tables.ajax.reload();
+                    }
+                })
+            } else if (result.isDenied) {
+                iziToast['success']({
+                    message: 'Hapus divisi di batalkan',
+                    position: "topRight"
+                });
+            }
+        })
+    }
 </script>
 @endpush

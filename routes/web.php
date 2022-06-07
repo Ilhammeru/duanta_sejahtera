@@ -71,6 +71,7 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::post('/division/store', [DivisionController::class, 'store'])->name('division.store');
     Route::put('/division/update/{id}', [DivisionController::class, 'update'])->name('division.update');
     Route::get('/division/detail/{id}', [DivisionController::class, 'detail'])->name('division.detail');
+    Route::delete('/division/{id}', [DivisionController::class, 'destroy'])->name("division.delete");
     // end::division
 
     // *************************************** USER MANAGEMENT ********************************* //
@@ -84,4 +85,3 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::resource('user', UserController::class);
     // end::user
 });
-
