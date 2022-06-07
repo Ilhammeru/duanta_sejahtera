@@ -34,9 +34,9 @@ class UsersSeeder extends Seeder
                 'status' => 1
             ],
             [
-                'name' => 'Yolanda',
-                'email' => 'ilham.g2405@gmail.com',
-                'password' => Hash::make('yolanda'),
+                'name' => 'admin',
+                'email' => 'admin@gmail.com',
+                'password' => Hash::make('admin'),
                 'phone' => (int)$phone,
                 'birth_date' => date('Y-m-d', strtotime('1996-05-24')),
                 'date_in' => date('Y-m-d', strtotime('2021-01-01')),
@@ -45,9 +45,9 @@ class UsersSeeder extends Seeder
                 'status' => 1
             ],
             [
-                'name' => 'Ricky',
-                'email' => 'ilham.meru.gumilang@gmail.com',
-                'password' => Hash::make('ricky'),
+                'name' => 'staff',
+                'email' => 'staff@gmail.com',
+                'password' => Hash::make('staff'),
                 'phone' => $phone,
                 'birth_date' => date('Y-m-d', strtotime('1996-05-24')),
                 'date_in' => date('Y-m-d', strtotime('2021-01-01')),
@@ -66,7 +66,7 @@ class UsersSeeder extends Seeder
             ],
             [
                 'user_id' => 2,
-                'role_id' => 2
+                'role_id' => 1
             ],
             [
                 'user_id' => 3,
