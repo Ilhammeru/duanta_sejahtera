@@ -126,7 +126,10 @@
                     </a>
                 </div>
                 {{-- begin::master data --}}
-                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow(['division.index']) }}">
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow([
+                        'division.index', 'customers.index', 'customers.create',
+                        'services.index', 'services.create'
+                        ]) }}">
                     <span class="menu-link">
                         <span class="menu-icon">
                             <!--begin::Svg Icon | path: icons/duotune/finance/fin006.svg-->
@@ -143,6 +146,22 @@
                                     <span class="bullet bullet-dot"></span>
                                 </span>
                                 <span class="menu-title">Divisi</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ menuActive(['services.index', 'services.create']) }}" href="{{ route('services.index') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Layanan / Produk</span>
+                            </a>
+                        </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ menuActive(['customers.index', 'customers.create']) }}" href="{{ route('customers.index') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Customer</span>
                             </a>
                         </div>
                     </div>

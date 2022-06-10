@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Master\DivisionController;
+use App\Http\Controllers\RegionController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +52,14 @@ Route::get('/password-request', function() {
     return 'password request';
 })->name('password.request');
 
-Route::group(['middleware' => ['auth', 'role:admin']], function() {
+Route::group(['middleware' => ['auth']], function() {
+    // begin::region
+    Route::get('/region/getCity/{id}', [RegionController::class, 'getCity']);
+    Route::get('/region/getDistrict/{id}', [RegionController::class, 'getDistrict']);
+    // end::region
+});
+
+Route::group(['middleware' => ['auth', 'role:admin:superadmin']], function() {
     Route::get('/dashboard', function() {
         $pageTitle = "Dashboard";
         $auth = User::with([
@@ -84,4 +94,14 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::post('/user/{id}', [UserController::class, 'update'])->name('user.update');
     Route::resource('user', UserController::class);
     // end::user
+    // begin::customer
+    Route::get('/customers/json', [CustomerController::class, 'json'])->name('customers.json');
+    Route::resource('customers', CustomerController::class);
+    Route::get('/customers/getFormService/{count}', [CustomerController::class, 'getFormService'])->name('customers.getFormService');
+    // end::customer
+    // begin::services
+    Route::get('/services/json', [ServiceController::class, 'json'])->name('services.json');
+    Route::resource('services', ServiceController::class);
+    Route::post('/services/update/{id}', [ServiceController::class, 'update'])->name('services.update');
+    // end::services
 });
