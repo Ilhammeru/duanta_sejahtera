@@ -19,7 +19,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DivisionSeeder::class,
             RoleSeeder::class,
-            UsersSeeder::class
+            UsersSeeder::class,
+            IndoRegionProvinceSeeder::class,
+            IndoRegionRegencySeeder::class,
+            IndoRegionDistrictSeeder::class,
+            IndoRegionVillageSeeder::class
         ]);
     }
 }
