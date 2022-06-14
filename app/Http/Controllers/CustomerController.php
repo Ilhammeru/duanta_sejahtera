@@ -162,7 +162,7 @@ class CustomerController extends Controller
 
             $customerService = [];
             for ($a = 0; $a < count($services); $a++) {
-                $customerService = [
+                $customerService[] = [
                     'customer_id' => $customer->id,
                     'service_id' => $services[$a],
                     'billing_type_id' => $billings[$a],
@@ -177,9 +177,7 @@ class CustomerController extends Controller
                 $fileName = $file->getClientOriginalName();
                 $folderName = implode('', str_split($name));
                 $path = Storage::putFileAs('public/customer/contract', $file, $fileName);
-                if ($path) {
-                    $pathToFile = asset('/storage/customer/contract/' . $fileName);
-                }
+                $pathToFile = asset('/storage/customer/contract/' . $fileName);
             }
 
             $contractData = [

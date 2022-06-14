@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('address')->nullable();
             $table->string('phone');
-            $table->integer('district');
+            $table->string('district');
             $table->integer('city');
             $table->integer('province');
             $table->string('npwp')->nullable();
