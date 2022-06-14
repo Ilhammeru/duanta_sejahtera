@@ -169,6 +169,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Torann\Hashids\HashidsServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -194,7 +195,8 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'DataTables' => Yajra\DataTables\Facades\DataTables::class,
-        'Image' => Intervention\Image\Facades\Image::class
+        'Image' => Intervention\Image\Facades\Image::class,
+        'Hashids' => Torann\Hashids\Facade\Hashids::class
     ])->toArray(),
 
 ];

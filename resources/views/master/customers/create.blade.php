@@ -20,7 +20,7 @@
     <div class="card card-flush">
         <div class="card-body">
             {{-- begin::form --}}
-            <form action="" id="formCustomer">
+            <form action="" id="formCustomer" enctype="multipart/form-data">
                 {{-- begin::section-title --}}
                 <h3 class="border-bottom text-center p-3 mb-5">Data Personal</h3>
                 {{-- end::section-title --}}
@@ -62,7 +62,7 @@
                     </div>
                     <div class="col-md-4 col-xl-4">
                         <label for="customerDistrict" class="col-form-label">Kecamatan/Kelurahan</label>
-                        <select name="city" id="customerDistrict" data-placeholder="- Pilih Kecamatan / Kelurahan -" class="form-select form-control">
+                        <select name="district" id="customerDistrict" data-placeholder="- Pilih Kecamatan / Kelurahan -" class="form-select form-control">
                             <option value="">- Pilih Kecamatan / Kelurahan -</option>
                         </select>
                     </div>
@@ -136,7 +136,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="customer_renewal" id="customerContractRenewal">
+                                    <input class="form-check-input" type="radio" name="customer_renewal" value="1" id="customerContractRenewal">
                                     <label class="form-check-label" for="customerContractRenewal">
                                       Ya
                                     </label>
@@ -144,7 +144,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="customer_renewal" id="customerContractRenewal1">
+                                    <input class="form-check-input" type="radio" name="customer_renewal" value="0" id="customerContractRenewal1">
                                     <label class="form-check-label" for="customerContractRenewal1">
                                       Tidak
                                     </label>
@@ -155,7 +155,8 @@
                 </div>
                 <div class="form-group mb-5 row">
                     <div class="col-md-6 col-xl-6">
-                        <label for=""></label>
+                        <label for="customerContractDoc" class="col-form-label">Upload Dokumen Perjanjian</label>
+                        <input type="file" class="form-control" name="aggreement_letter" id="customerContractDoc" accept="image/png, image/jpg, image/jpeg, image/pdf">
                     </div>
                 </div>
 
@@ -185,6 +186,9 @@
             }
         });
 
+        let buttonSave = $('#btnSave');
+        let form = $('#formCustomer');
+
         $('#customerProvince').on('change', function(e) {
             e.preventDefault();
             let province = $(this).val();
@@ -193,10 +197,7 @@
                 url: "{{ url('/region/getCity/') }}" + "/" + province,
                 dataType: 'json',
                 error: function(err) {
-                    iziToast['error']({
-                        message: err.responseJSON.message,
-                        position: "topRight"
-                    });
+                    handleError(err);
                 },
                 success: function(res) {
                     let option = '<option value="">- Pilih Kota -</option>';
@@ -219,13 +220,9 @@
                 url: "{{ url('/region/getDistrict/') }}" + "/" + district,
                 dataType: 'json',
                 error: function(err) {
-                    iziToast['error']({
-                        message: err.responseJSON.message,
-                        position: "topRight"
-                    });
+                    handleError(err);
                 },
                 success: function(res) {
-                    console.log(res);
                     let option = '<option value="">- Pilih Kota -</option>';
 
                     for (let a = 0; a < res.data.length; a++) {
@@ -246,8 +243,46 @@
                 dataType: 'json',
                 success: function(res) {
                     $('#targetServiceSection').append(res.data.html);
-                    $('.customerContractService').select2();
-                    $('.customerContractBillingType').select2();
+                    $(`#customerContractService${serviceSection.length}`).select2();
+                    $(`#customerContractBillingType${serviceSection.length}`).select2();
+                }
+            })
+        }
+
+        function deleteSectionService(idSection) {
+            $('#serviceSection' + idSection).remove();
+        }
+
+        function save() {
+            let data = new FormData($('#formCustomer')[0]);
+            $.ajax({
+                type: "POST",
+                url: "{{ route('customers.store') }}",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: "json",
+                beforeSend: function() {
+                    buttonSave.attr('disabled', true);
+                    buttonSave.text('Menyimpan data ...');
+                },
+                success: function(res) {
+                    console.log(res);
+                    buttonSave.attr('disabled', false);
+                    buttonSave.text('Simpan');
+                    iziToast['success']({
+                        message: 'Customer Berhasil Disimpan',
+                        position: "topRight"
+                    });
+                    document.getElementById('formCustomer').reset();
+                    window.location.href = "{{ route('customers.index') }}";
+                },
+                error: function(err) {
+                    console.error(err);
+                    buttonSave.attr('disabled', false);
+                    buttonSave.text('Simpan');
+                    handleError(err);
                 }
             })
         }

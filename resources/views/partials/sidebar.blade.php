@@ -127,7 +127,7 @@
                 </div>
                 {{-- begin::master data --}}
                 <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow([
-                        'division.index', 'customers.index', 'customers.create',
+                        'division.index', 'customers.*',
                         'services.index', 'services.create'
                         ]) }}">
                     <span class="menu-link">
@@ -157,7 +157,7 @@
                             </a>
                         </div>
                         <div class="menu-item">
-                            <a class="menu-link {{ menuActive(['customers.index', 'customers.create']) }}" href="{{ route('customers.index') }}">
+                            <a class="menu-link {{ menuActive(['customers.*']) }}" href="{{ route('customers.index') }}">
                                 <span class="menu-bullet">
                                     <span class="bullet bullet-dot"></span>
                                 </span>

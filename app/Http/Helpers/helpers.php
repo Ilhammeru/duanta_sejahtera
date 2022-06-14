@@ -38,7 +38,7 @@ if (! function_exists('menuActive')) {
 }
 
 if (!function_exists('sendResponse')) {
-    function sendResponse($data, $message, $status) {
+    function sendResponse($data, $message = 'SUCCESS', $status = 201) {
         return response()->json([
             'data' => $data,
             'message' => $message

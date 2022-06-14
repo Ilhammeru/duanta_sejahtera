@@ -52,14 +52,14 @@ Route::get('/password-request', function() {
     return 'password request';
 })->name('password.request');
 
-Route::group(['middleware' => ['auth']], function() {
+Route::group(['middleware' => ['auth', 'role:admin:superadmin']], function() {
     // begin::region
     Route::get('/region/getCity/{id}', [RegionController::class, 'getCity']);
     Route::get('/region/getDistrict/{id}', [RegionController::class, 'getDistrict']);
     // end::region
 });
 
-Route::group(['middleware' => ['auth', 'role:admin:superadmin']], function() {
+Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::get('/dashboard', function() {
         $pageTitle = "Dashboard";
         $auth = User::with([
@@ -97,7 +97,9 @@ Route::group(['middleware' => ['auth', 'role:admin:superadmin']], function() {
     // begin::customer
     Route::get('/customers/json', [CustomerController::class, 'json'])->name('customers.json');
     Route::resource('customers', CustomerController::class);
+    Route::post('/customer/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::get('/customers/getFormService/{count}', [CustomerController::class, 'getFormService'])->name('customers.getFormService');
+    Route::get('/customer/edit/form/{type}/{id}', [CustomerController::class, 'showForm'])->name('customers.edit.form');
     // end::customer
     // begin::services
     Route::get('/services/json', [ServiceController::class, 'json'])->name('services.json');
