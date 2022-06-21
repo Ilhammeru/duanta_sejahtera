@@ -75,5 +75,34 @@
         ajax: "{{ route('customers.json') }}",
         columns: _columns,
     });
+
+    function deleteCustomer(id) {
+        Swal.fire({
+            title: 'Apakah anda yakin ingin menghapus pelanggan ini?',
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: 'Ya!',
+            denyButtonText: `Batalkan`,
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url('/customers') }}" + '/' + id,
+                    dataType: 'json',
+                    error: function(err) {
+                        handleError(err);
+                    },
+                    success: function(res) {
+                        iziToast['success']({
+                            message: 'Pelanggan berhasil di hapus',
+                            position: "topRight"
+                        });
+                        tables.ajax.reload();
+                    }
+                })
+            }
+        })
+    }
 </script>
 @endpush

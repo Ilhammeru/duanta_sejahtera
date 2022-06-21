@@ -109,14 +109,20 @@
             }
         });
 
-		function handleError(err) {
+		function handleError(err, button = "") {
+			console.log(err);
+			if (button != "") {
+				button.attr('disabled', false);
+				button.text('Simpan');
+			}
             let message = err.responseJSON.message;
+			console.log(message);
             if (message == 'FAILED') {
                 iziToast['error']({
                     message: err.responseJSON.data.error,
                     position: "topRight"
                 });
-            } else if (message = "VALIDATION_FAILED") {
+            } else if (message == "VALIDATION_FAILED") {
                 let error = err.responseJSON.data.error;
                 for (let a = 0; a < error.length; a++) {
                     iziToast['error']({
@@ -126,7 +132,7 @@
                 }
             } else {
                 iziToast['error']({
-                    message: err.responseJSON.message,
+                    message: message,
                     position: "topRight"
                 });
             }

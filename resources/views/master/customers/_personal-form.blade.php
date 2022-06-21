@@ -1,4 +1,4 @@
-<form action="" id="formEditPersonalData" enctype="multipart/form-data">
+<form action="" id="formEditCustomer" enctype="multipart/form-data">
     <div class="form-group row mb-5">
         <div class="col-md-6 col-xl-6">
             <label for="editCustomerName" class="col-form-label">Nama</label>

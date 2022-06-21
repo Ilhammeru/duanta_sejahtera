@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('npwp')->nullable();
             $table->string('pic_name')->nullable();
             $table->string('pic_phone')->nullable();
+            $table->string('type')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });

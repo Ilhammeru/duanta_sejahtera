@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContainerSizeTypeController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Master\DivisionController;
 use App\Http\Controllers\RegionController;
@@ -84,6 +85,11 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::delete('/division/{id}', [DivisionController::class, 'destroy'])->name("division.delete");
     // end::division
 
+    // begin::container-size
+    Route::get('/container-size-type/json', [ContainerSizeTypeController::class, 'json'])->name('container-size-type.json');
+    Route::resource('container-size-type', ContainerSizeTypeController::class);
+    // end::container-size
+
     // *************************************** USER MANAGEMENT ********************************* //
     // begin::role
     Route::get('/roles/json', [RoleController::class, 'json'])->name('roles.json');
@@ -96,8 +102,14 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     // end::user
     // begin::customer
     Route::get('/customers/json', [CustomerController::class, 'json'])->name('customers.json');
+    Route::get('/customer/change-service/{id}', [CustomerController::class, 'changeService'])->name('customer.changeService');
+    Route::get('/customer/change-contract/{id}', [CustomerController::class, 'changeContract'])->name('customer.changeContract');
+    Route::post('/customer/change-service/{id}', [CustomerController::class, 'storeService'])->name('customer.service.store');
+    Route::post('/customer/change-contract/{id}', [CustomerController::class, 'storeContract'])->name('customer.contract.store');
+    Route::get('/customer/init/{id}/{type}', [CustomerController::class, 'detailInit'])->name('customer.init');
+    Route::post('/customers/{id}', [CustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/delete/{id}', [CustomerController::class, 'deleteContractPhoto'])->name('customers.deleteContractPhoto');
     Route::resource('customers', CustomerController::class);
-    Route::post('/customer/{id}', [CustomerController::class, 'update'])->name('customers.update');
     Route::get('/customers/getFormService/{count}', [CustomerController::class, 'getFormService'])->name('customers.getFormService');
     Route::get('/customer/edit/form/{type}/{id}', [CustomerController::class, 'showForm'])->name('customers.edit.form');
     // end::customer

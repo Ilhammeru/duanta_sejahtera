@@ -2,9 +2,9 @@
 
 {{-- begin::styles --}}
 @push('styles')
-<link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+<link href="{{ asset('plugins/custom/filepond/filepond.css') }}" rel="stylesheet" />
 <link
-    href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
+    href="{{ asset('plugins/custom/filepond/plugins-preview.css') }}"
     rel="stylesheet"
 />
 @endpush
@@ -31,37 +31,37 @@
     <div class="card card-flush">
         <div class="card-body">
             {{-- begin::form --}}
-            <form action="" id="formCustomer" enctype="multipart/form-data">
+            <form action="{{ route('customers.update', $customer->id) }}" id="formCustomer" enctype="multipart/form-data">
                 {{-- begin::section-title --}}
                 <h3 class="border-bottom text-center p-3 mb-5">Data Personal</h3>
                 {{-- end::section-title --}}
                 <div class="form-group mb-5 row">
                     <div class="col-md-6 col-xl-6">
                         <label for="customerName" class="col-form-label">Nama</label>
-                        <input type="text" placeholder="Nama Customer" name="name" class="form-control" id="customerName">
+                        <input type="text" placeholder="Nama Customer" value="{{ $customer->name }}" name="name" class="form-control" id="customerName">
                     </div>
                     <div class="col-md-6 col-xl-6">
                         <label for="customerEmail" class="col-form-label">Email</label>
-                        <input type="email" name="email" placeholder="Email Customer" class="form-control" id="customerEmail">
+                        <input type="email" name="email" value="{{ $customer->email }}" placeholder="Email Customer" class="form-control" id="customerEmail">
                     </div>
                 </div>
                 <div class="form group row mb-5">
                     <div class="col-md-6 col-xl-6">
                         <label for="customerPhone" class="col-form-label">Telepon</label>
-                        <input type="number" placeholder="No. Telpon Customer" name="phone" class="form-control" id="customerPhone">
+                        <input type="number" value="{{ $customer->phone }}" placeholder="No. Telpon Customer" name="phone" class="form-control" id="customerPhone">
                     </div>
                     <div class="col-md-6 col-xl-6">
                         <label for="customerNpwp" class="col-form-label">NPWP</label>
-                        <input type="text" placeholder="NPWP Customer" name="npwp" class="form-control" id="customerNpwp">
+                        <input type="text" placeholder="NPWP Customer" value="{{ $customer->npwp }}" name="npwp" class="form-control" id="customerNpwp">
                     </div>
                 </div>
                 <div class="form-group row mb-5">
                     <div class="col-md-4 col-xl-4">
                         <label for="customerProvince" class="col-form-label">Provinsi</label>
-                        <select name="province" id="customerProvince" data-placeholder="- Pilih Provinsi -" class="form-select form-control">
+                        <select name="province" value="{{ $customer->province }}" id="customerProvince" data-placeholder="- Pilih Provinsi -" class="form-select form-control">
                             <option value="">- Pilih Provinsi -</option>
                             @foreach ($provinces as $province)
-                                <option value="{{ $province->id }}">{{ $province->name }}</option>
+                                <option {{ $customer->province == $province->id ? 'selected' : '' }} value="{{ $province->id }}">{{ $province->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -69,29 +69,37 @@
                         <label for="customerCity" class="col-form-label">Kota</label>
                         <select name="city" id="customerCity" data-placeholder="- Pilih Kota -" class="form-select form-control">
                             <option value="">- Pilih Kota -</option>
+                            @foreach ($regencies as $regency)
+                                <option {{ $customer->city == $regency->id ? 'selected' : '' }} value="{{ $regency->id }}">{{ $regency->name }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-md-4 col-xl-4">
                         <label for="customerDistrict" class="col-form-label">Kecamatan/Kelurahan</label>
                         <select name="district" id="customerDistrict" data-placeholder="- Pilih Kecamatan / Kelurahan -" class="form-select form-control">
                             <option value="">- Pilih Kecamatan / Kelurahan -</option>
+                            @foreach ($format as $item)
+                                <option {{ $customer->district == $item['id'] ? 'selected' : '' }} value="{{ $item['id'] }}">{{ $item['name'] }}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="form-group row mb-5">
                     <div class="col">
                         <label for="customerAddress" class="col-form-label">Alamat Lengkap</label>
-                        <textarea name="address" id="customerAddress" cols="4" rows="4" class="form-control"></textarea>
+                        <textarea name="address" id="customerAddress" cols="4" rows="4" class="form-control">
+                            {{ $customer->address }}
+                        </textarea>
                     </div>
                 </div>
                 <div class="form-group row mb-5">
                     <div class="col-md-6 col-xl-6">
                         <label for="customerPicName" class="col-form-label">Nama PIC</label>
-                        <input type="text" placeholder="Nama PIC" name="pic_name" class="form-control" id="customerPicName">
+                        <input type="text" placeholder="Nama PIC" value="{{ $customer->pic_name }}" name="pic_name" class="form-control" id="customerPicName">
                     </div>
                     <div class="col-md-6 col-xl-6">
                         <label for="customerPicPhone" class="col-form-label">Telepon PIC</label>
-                        <input type="number" placeholder="No. Telepon PIC" name="pic_phone" class="form-control" id="customerPicPhone">
+                        <input type="number" placeholder="No. Telepon PIC" value="{{ $customer->pic_phone }}" name="pic_phone" class="form-control" id="customerPicPhone">
                     </div>
                 </div>
 
@@ -103,25 +111,33 @@
                     </div>
                 </div>
                 {{-- begin::service-form --}}
-                <div class="form-gorup row mb-5 serviceSection">
-                    <div class="col-md-6 col-xl-6">
-                        <label for="customerContractService1" class="col-form-label">Pelayanan</label>
-                        <select name="customer_service_id[]" id="customerContractService1" class="form-control customerContractService">
-                            <option value="">- Pilih Pelayanan -</option>
-                            @foreach ($services as $service)
-                                <option value="{{ $service->id }}">{{ $service->name }}</option>
-                            @endforeach
-                        </select>
+                @for ($i = 0; $i < count($customer->services); $i++)
+                    <div class="form-gorup row mb-5 serviceSection" id="serviceSection{{ $i + 1 }}">
+                        <div class="col-md-5 col-xl-5">
+                            <label for="customerContractService1" class="col-form-label">Pelayanan</label>
+                            <select name="customer_service_id[]" id="customerContractService{{ $i + 1 }}" class="form-control customerContractService">
+                                <option value="">- Pilih Pelayanan -</option>
+                                @foreach ($services as $service)
+                                    <option {{ $customer->services[$i]->service_id == $service->id ? 'selected' : '' }} value="{{ $service->id }}">{{ $service->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-5 col-xl-5">
+                            <label for="customerContractBillingType1" class="col-form-label">Jenis Pembayaran</label>
+                            <select name="customer_billing_type_id[]" id="customerContractBillingType{{ $i + 1 }}" class="form-control customerContractBillingType">
+                                <option value="">- Pilih Jenis Pembayaran -</option>
+                                <option {{ $customer->services[$i]->billing_type_id == 1 ? 'selected' : '' }} value="1">Cash</option>
+                                <option {{ $customer->services[$i]->billing_type_id == 2 ? 'selected' : '' }} value="2">Tempo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-xl-2">
+                            <label for="" class="col-form-label label-action" style="color: transparent;">Data</label>
+                            <span class="text-info form-control" style="border: none !important;">
+                                <i class="fa fa-times" style="cursor:pointer;" onclick="deleteSectionService({{ $i + 1 }})"></i>
+                            </span>
+                        </div>
                     </div>
-                    <div class="col-md-6 col-xl-6">
-                        <label for="customerContractBillingType1" class="col-form-label">Jenis Pembayaran</label>
-                        <select name="customer_billing_type_id[]" id="customerContractBillingType1" class="form-control customerContractBillingType">
-                            <option value="">- Pilih Jenis Pembayaran -</option>
-                            <option value="1">Cash</option>
-                            <option value="2">Tempo</option>
-                        </select>
-                    </div>
-                </div>
+                @endfor
                 <div id="targetServiceSection"></div>
                 <div class="form-group" style="margin-bottom: 30px;">
                     <button class="btn btn-primary p-2" style="font-size: 10px;" onclick="addService()" type="button">
@@ -137,7 +153,7 @@
                     </div>
                     <div class="col-md-1"></div>
                     <div class="col-md-5">
-                        <input type="date" value="{{ date('Y-m-d') }}" id="customerContractDate" class="form-control" name="contract_date">
+                        <input type="date" value="{{ date('Y-m-d', strtotime($customer->contract->start_date)) }}" id="customerContractDate" class="form-control" name="contract_date">
                     </div>
                 </div>
 
@@ -149,7 +165,7 @@
                     <div class="col-md-1"></div>
                     <div class="col-md-5">
                         <div class="input-group">
-                            <input type="text" id="customerContractPeriod" class="form-control" name="contract_period">
+                            <input type="text" id="customerContractPeriod" value="{{ $customer->contract->contract_period_in_day }}" class="form-control" name="contract_period">
                             <span class="input-group-text" id="addon4">Hari</span>
                         </div>
                     </div>
@@ -165,7 +181,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="customer_renewal" value="1" id="customerContractRenewal">
+                                    <input class="form-check-input" {{ $customer->contract->is_auto_renewal == 1 ? 'checked' : '' }} type="radio" name="customer_renewal" value="1" id="customerContractRenewal">
                                     <label class="form-check-label" for="customerContractRenewal">
                                       Ya
                                     </label>
@@ -173,7 +189,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="customer_renewal" value="0" id="customerContractRenewal1">
+                                    <input class="form-check-input" {{ $customer->contract->is_auto_renewal == 0 ? 'checked' : '' }} type="radio" name="customer_renewal" value="0" id="customerContractRenewal1">
                                     <label class="form-check-label" for="customerContractRenewal1">
                                       Tidak
                                     </label>
@@ -192,7 +208,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="customer_type" value="casual" id="customerType">
+                                    <input class="form-check-input" type="radio" {{ $customer->type == 'casual' ? 'checked' : '' }} name="customer_type" value="casual" id="customerType">
                                     <label class="form-check-label" for="customerType">
                                         Casual
                                     </label>
@@ -200,7 +216,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="customer_type" value="regular" id="customerType1">
+                                    <input class="form-check-input" {{ $customer->type == 'regular' ? 'checked' : '' }} type="radio" name="customer_type" value="regular" id="customerType1">
                                     <label class="form-check-label" for="customerType1">
                                         Regular
                                     </label>
@@ -236,10 +252,12 @@
 
 {{-- begin::script --}}
 @push('scripts')
-    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
-    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+    <script src="{{ asset('plugins/custom/filepond/filepond.js') }}"></script>
+    <script src="{{ asset('plugins/custom/filepond/plugins-preview.js') }}"></script>
     <script>
         $('#customerProvince').select2();
+        $('#customerCity').select2();
+        $('#customerDistrict').select2();
 
         // begin::variable
         let buttonSave = $('#btnSave');
@@ -248,7 +266,6 @@
         // end::variable
 
         for (let aa = 0; aa < sectionService.length; aa++) {
-            console.log(aa);
             $('#customerContractService' + (aa + 1)).select2();
             $('#customerContractBillingType' + (aa + 1)).select2();
         }
@@ -259,6 +276,43 @@
         const pond = FilePond.create(
             document.getElementById('aggreementLetterPhoto')
         );
+        let letterFile = "{{ $customer->contract->aggreement_letter_img }}";
+        if (letterFile != "") {
+            pond.addFile("{{ asset($customer->contract->aggreement_letter_img) }}");
+        }
+
+        document.getElementById('aggreementLetterPhoto').addEventListener(
+            'FilePond:removefile', (e) => {
+                console.log('e', e);
+                let id = "{{ $customer->id }}";
+                Swal.fire({
+                    title: 'Apakah anda yakin ingin menghapus Foto ini?',
+                    showDenyButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'Ya!',
+                    denyButtonText: `Batalkan`,
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "DELETE",
+                            url: "{{ url('/customers/delete') }}" + '/' + id,
+                            dataType: 'json',
+                            error: function(err) {
+                                handleError(err);
+                            },
+                            success: function(res) {
+                                iziToast['success']({
+                                    message: 'Foto berhasil di hapus',
+                                    position: "topRight"
+                                });
+                                window.location.href = "{{ url('/customers') }}" + "/" + id + "/edit";
+                            }
+                        });
+                    }
+                });
+            }
+        )
         // end::filePond
 
         $('#customerProvince').on('change', function(e) {
@@ -280,6 +334,7 @@
                     }
                     $('#customerCity').html(option);
                     $('#customerCity').select2();
+                    $('#customerDistrict').html('');
                 }
             })
         });
@@ -322,7 +377,15 @@
         }
 
         function deleteSectionService(idSection) {
-            $('#serviceSection' + idSection).remove();
+            let currentLength = $('.serviceSection').length;
+            if (currentLength == 1) {
+                iziToast['error']({
+                    message: 'Setidaknya Pilih 1 Layanan dan Tipe Pembayaran',
+                    position: "topRight"
+                });
+            } else {
+                $('#serviceSection' + idSection).remove();
+            }
         }
 
         function save() {
@@ -332,9 +395,11 @@
                 pondFile = pondFile.file;
                 data.append('aggreement_letter', pondFile);
             }
+            let url = $('#formCustomer').attr('action');
+            console.log(url);
             $.ajax({
                 type: "POST",
-                url: "{{ route('customers.store') }}",
+                url: url,
                 data: data,
                 cache: false,
                 contentType: false,

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('customer_id');
             $table->integer('contract_period_in_day')->nullable();
             $table->boolean('is_auto_renewal')->nullable();
-            $table->text('agreement_letter_img')->nullable();
+            $table->text('aggreement_letter_img')->nullable();
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
             $table->timestamps();

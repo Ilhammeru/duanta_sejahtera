@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use Hashids;
+use Illuminate\Support\Facades\File;
 
 class CustomerController extends Controller
 {
@@ -61,7 +62,7 @@ class CustomerController extends Controller
                 return $name . " ( $phone )";
             })
             ->addColumn('action', function($data) {
-                return '<span onclick="edit('. $data->id .')" class="text-info me-4"><i class="fas fa-edit"></i></span>
+                return '<a href="'. route('customers.edit', $data->id) .'" class="text-info me-4"><i class="fas fa-edit"></i></a>
                 <span class="text-info" onclick="deleteCustomer('. $data->id .')"><i class="fas fa-trash"></i></span>';
             })
             ->rawColumns(['action', 'pic', 'name'])
@@ -105,9 +106,8 @@ class CustomerController extends Controller
         $contractDate = $request->contract_date;
         $contractPeriod = $request->contract_period;
         $contractRenewal = $request->customer_renewal;
-        if ($request->hasFile('aggreement_letter')) {
-            $file = $request->file('aggreement_letter');
-        }
+        $customerType = $request->customer_type;
+        $nameNoSpace = implode('', explode(' ', $name));
 
         // validation
         $rules = [
@@ -156,40 +156,47 @@ class CustomerController extends Controller
                 'npwp' => $npwp,
                 'pic_name' => $picName,
                 'pic_phone' => $picPhone,
+                'type' => $customerType,
                 'created_at' => Carbon::now()
             ];
-            $customer = Customer::create($customerData);
 
-            $customerService = [];
+            $customerId = Customer::insertGetId($customerData);
+
+            $serviceData = [];
             for ($a = 0; $a < count($services); $a++) {
-                $customerService[] = [
-                    'customer_id' => $customer->id,
+                $serviceData[] = [
+                    'customer_id' => $customerId,
                     'service_id' => $services[$a],
                     'billing_type_id' => $billings[$a],
                     'created_at' => Carbon::now()
                 ];
             }
-            $custService = CustomerServices::create($customerService);
-
-            // handle image
-            if ($request->hasFile('aggreement_letter')) {
-                $file = $request->file('aggreement_letter');
-                $fileName = $file->getClientOriginalName();
-                $folderName = implode('', str_split($name));
-                $path = Storage::putFileAs('public/customer/contract', $file, $fileName);
-                $pathToFile = asset('/storage/customer/contract/' . $fileName);
-            }
+            CustomerServices::insert($serviceData);
 
             $contractData = [
-                'customer_id' => $customer->id,
+                'customer_id' => $customerId,
                 'contract_period_in_day' => $contractPeriod,
                 'is_auto_renewal' => $contractRenewal,
-                'agreement_letter_img' => $pathToFile ?? NULL,
-                'start_date' => $contractDate,
-                'end_date' => date('Y-m-d', strtotime("+$contractPeriod days", strtotime($contractDate))),
-                'created_at' => Carbon::now()
+                'start_date' => date('Y-m-d', strtotime($contractDate)),
+                'end_date' => date('Y-m-d', strtotime("+$contractPeriod days", strtotime($contractDate)))
             ];
-            CustomerContract::create($contractData);
+            if ($request->has('aggreement_letter')) {
+                $file = $request->file('aggreement_letter');
+                $filename = $nameNoSpace . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('customer/contract/' . $nameNoSpace, $filename, 'public');
+                if ($path) {
+                    $contractData['aggreement_letter_img'] = $path;
+                }
+            }
+            CustomerContract::insert($contractData);
+
+            DB::commit();
+            return sendResponse([
+                'customer' => $customerData,
+                'service' => $serviceData,
+                'contract' => $contractData,
+                'file' => $path ?? ''
+            ]);
         } catch (\Throwable $th) {
             DB::rollBack();
 
@@ -199,14 +206,6 @@ class CustomerController extends Controller
                 500
             );
         }
-
-        DB::commit();
-
-        return sendResponse(
-            $customer,
-            'SUCCESS',
-            201
-        );
     }
 
     /**
@@ -231,6 +230,137 @@ class CustomerController extends Controller
     }
 
     /**
+     * Get data and render view for customer's service
+     * 
+     * @return \Illuminate\Contract\Renderable
+     */
+    public function changeService($id) {
+        $customer = Customer::with(['services'])->find($id);
+        $service = Service::all();
+        $view = view('master.customers._service-form', compact('customer', 'service'))->render();
+        return sendResponse(['view' => $view]);
+    }
+
+    /**
+     * Get data and render view for customer's contract
+     * 
+     * @return \Illuminate\Contract\Renderable
+     */
+    public function changeContract($id) {
+        $customer = Customer::with(['contract'])->find($id);
+        $view = view('master.customers._contract-form', compact('customer'))->render();
+        $aggrementImg = $customer->contract->aggreement_letter_img != NULL ? asset($customer->contract->aggreement_letter_img) : '';
+        return sendResponse(['view' => $view, 'aggrementImg' => $aggrementImg]);
+    }
+
+    /**
+     * Function to store edited service data
+     * 
+     * @return \Illuminate\Http\Response
+     */
+    public function storeService(Request $request, $id) {
+        $services = $request->service_id;
+        $billings = $request->billing_type_id;
+        
+        // begin::validation
+        if (count($services) != count($billings)) {
+            return sendResponse(
+                ['error' => 'Pastikan Semua Layanan atau Jenis Pembayaran Terisi Semua'],
+                'VALIDATION_FAILED',
+                500
+            );
+        }
+        // end::validation
+
+        DB::beginTransaction();
+        try {
+            // delete all data
+            CustomerServices::where('customer_id', $id)->delete();
+            $dataService = [];
+            for ($a = 0; $a < count($services); $a++) {
+                $dataService[] = [
+                    'customer_id' => $id,
+                    'service_id' => $services[$a],
+                    'billing_type_id' => $billings[$a],
+                    'created_at' => Carbon::now()
+                ];
+            }
+            CustomerServices::insert($dataService);
+
+            DB::commit();
+            return sendResponse([]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return sendResponse(
+                ['error' => $th->getMessage()],
+                'FAILED',
+                500
+            );
+        }
+    }
+
+    /**
+     * Function to store edited contract data
+     * 
+     * @return /Illuminate/Http/Response
+     */
+    public function storeContract(Request $request, $id) {
+        $contractDate = $request->contract_date;
+        $contractPeriod = $request->contract_period;
+        $contractRenewal = $request->customer_renewal;
+        $customerType = $request->customer_type;
+        $contract = CustomerContract::where('customer_id', $id)->first();
+        // begin::validation
+        $rules = [
+            'contract_date' => 'required',
+            'contract_period' => 'required',
+            'customer_renewal' => 'required',
+            'customer_type' => 'required'
+        ];
+        $messageRules = [
+            'contract_date.required' => 'Tanggal Mulai Kontrak Harus Diisi',
+            'contract_period.required' => 'Lama Kontrak Harus Diisi',
+            'customer_renewal.required' => 'Pembaruhan Kontrak Otomatis Harus Diisi',
+            'customer_type.required' => 'Jenis Pelanggan Harus Diisi'
+        ];
+        $validation = Validator::make(
+            $request->all(),
+            $rules,
+            $messageRules
+        );
+        if ($validation->fails()) {
+            $error = $validation->errors()->all();
+            return sendResponse(
+                ['error' => $error],
+                'VALIDATION_FAILED',
+                500
+            );
+        }
+        // end::validation
+        
+        DB::beginTransaction();
+        try {
+            Customer::where('id', $id)->update(['type' => $customerType]);
+            $contract->start_date = $contractDate;
+            $contract->contract_period_in_day = $contractPeriod;
+            $contract->is_auto_renewal = $contractRenewal;
+            $contract->end_date = date('Y-m-d', strtotime("+$contractPeriod days", strtotime($contractDate)));
+            $contract->save();
+
+            DB::commit();
+            return sendResponse($contract);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return sendResponse(
+                ['error' => $th->getMessage()],
+                'FAILED',
+                500
+            );
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
@@ -238,7 +368,30 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        //
+        $customer = Customer::with(['contract', 'services'])
+            ->find($id);
+        $pageTitle = 'Edit Data Pelanggan';
+        $services = Service::all();
+        $provinces = Province::all();
+        $district = $customer->district;
+        $regencies = Regency::where('province_id', $customer->province)->get();
+        $districts = District::where('regency_id', $customer->city)->get();
+
+        $format = [];
+        foreach ($districts as $district) {
+            $villages = Village::where('district_id', $district->id)->get();
+
+            foreach ($villages as $village) {
+                $format[] = [
+                    'id' => $district->id . '/' . $village->id,
+                    'name' => 'Kec. ' . $district->name . ' / ' . 'Kel. ' . $village->name
+                ];
+            }
+        }
+        return view('master.customers.edit', compact(
+            'customer', 'pageTitle', 'provinces',
+            'services', 'regencies', 'format'
+        ));
     }
 
     /**
@@ -255,13 +408,20 @@ class CustomerController extends Controller
         $email = $request->email;
         $phone = $request->phone;
         $npwp = $request->npwp;
+        $type = $request->customer_type;
         $province = $request->province;
         $city = $request->city;
         $district = $request->district;
         $address = $request->address;
         $picName = $request->pic_name;
         $picPhone = $request->pic_phone;
-        $currentCustomer = Customer::with(['_province', 'regency'])->find($id);
+        $services = $request->customer_service_id;
+        $billings = $request->customer_billing_type_id;
+        $contractDate = $request->contract_date;
+        $contractPeriod = $request->contract_period;
+        $contractRenewal = $request->customer_renewal;
+        $nameNoSpace = implode('', explode(' ', $name));
+        $currentCustomer = Customer::with(['_province', 'regency', 'contract'])->find($id);
 
         // validation
         $rules = [
@@ -298,6 +458,8 @@ class CustomerController extends Controller
             );
         }
 
+        DB::beginTransaction();
+
         try {
             $currentCustomer->name = $name;
             $currentCustomer->email = $email;
@@ -308,18 +470,50 @@ class CustomerController extends Controller
             $currentCustomer->district = $district;
             $currentCustomer->npwp = $npwp;
             $currentCustomer->pic_name = $picName;
+            $currentCustomer->type = $type;
             $currentCustomer->pic_phone = $picPhone;
             $currentCustomer->updated_at = Carbon::now();
             $currentCustomer->save();
-            $splitDistrict = explode('/', $district);
-            $districts = District::select('name')->where('id', $splitDistrict[0])->first()->name;
-            $village = Village::select('name')->where('id', $splitDistrict[1])->first()->name;
-            $currentCustomer = Customer::with(['_province', 'regency'])->find($id);
-            $completeAddress = $address . ", $village $districts, " . $currentCustomer->regency->name . ' ' . $currentCustomer->_province->name;
-            return sendResponse(
-                ['customer' => $currentCustomer, 'address' => $completeAddress]
-            );
+
+            $serviceData = [];
+            for ($a = 0; $a < count($services); $a++) {
+                $serviceData[] = [
+                    'customer_id' => $id,
+                    'service_id' => $services[$a],
+                    'billing_type_id' => $billings[$a],
+                    'updated_at' => Carbon::now()
+                ];
+            }
+            CustomerServices::where('customer_id', $id)->delete();
+            CustomerServices::where('customer_id', $id)->insert($serviceData);
+
+            $contractData = [
+                'customer_id' => $id,
+                'contract_period_in_day' => $contractPeriod,
+                'is_auto_renewal' => $contractRenewal,
+                'start_date' => date('Y-m-d', strtotime($contractDate)),
+                'end_date' => date('Y-m-d', strtotime("+$contractPeriod days", strtotime($contractDate)))
+            ];
+            $currentImagePath = $currentCustomer->contract->aggreement_letter_img;
+            if ($request->aggreement_letter != null && $request->aggreement_letter->getClientOriginalName() != 'blob') {
+                $file = $request->aggreement_letter;
+                $filename = $nameNoSpace . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('customer/contract/' . $nameNoSpace, $filename, 'public');
+                if ($path) {
+                    $contractData['aggreement_letter_img'] = $path;
+                }
+            }
+            $saveContract = CustomerContract::where('customer_id', $id)->update($contractData);
+            if (isset($path)) {
+                if ($saveContract) {
+                    File::delete($currentImagePath);
+                }
+            }
+
+            DB::commit();
+            return sendResponse([]);
         } catch (\Throwable $th) {
+            DB::rollBack();
             return sendResponse(
                 ['error' => $th->getMessage()],
                 'FAILED',
@@ -336,7 +530,25 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $pathToFile = CustomerContract::select('aggreement_letter_img')->where('customer_id', $id)
+                ->first();
+            CustomerContract::where('customer_id', $id)->delete();
+            CustomerServices::where('customer_id', $id)->delete();
+            Customer::where('id', $id)->delete();
+
+            DB::commit();
+            File::delete($pathToFile->aggreement_letter_img);
+            return sendResponse([]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return sendResponse(
+                ['error' => $th->getMessage()],
+                'FAILED',
+                500
+            );
+        }
     }
 
     public function getFormService($count) {
@@ -376,5 +588,54 @@ class CustomerController extends Controller
             'SUCCESS',
             201
         );
+    }
+
+    public function detailInit($id, $type) {
+        try {
+            $customer = Customer::with(['services', 'contract', '_province', 'regency'])
+                ->find($id);
+            $splitDistrict = explode('/', $customer->district);
+            $district = District::select('name')->where('id', $splitDistrict[0])->first()->name;
+            $village = Village::select('name')->where('id', $splitDistrict[1])->first()->name;
+            $completeAddress = $customer->address . ", $village $district, " . $customer->regency->name . ' ' . $customer->_province->name;
+            if ($type == 'all') {
+                $viewService = view('master.customers._init-service', compact('customer'))->render();
+                $viewPersonal = view('master.customers._init-personal', compact('customer', 'completeAddress'))->render();
+                $viewContract = view('master.customers._init-contract', compact('customer', 'completeAddress'))->render();
+                return sendResponse([
+                    'personal' => $viewPersonal,
+                    'service' => $viewService,
+                    'contract' => $viewContract
+                ]);
+            } else {
+                $view = view('master.customers.' . $type, compact('customer', 'completeAddress'))->render();
+                return sendResponse(['view' => $view]);
+            }
+        } catch (\Throwable $th) {
+            return sendResponse(
+                ['error' => $th->getMessage()],
+                'FAILED',
+                500
+            );
+        }
+    }
+
+    public function deleteContractPhoto($id) {
+        try {
+            $currentData = CustomerContract::where('customer_id', $id)->first();
+            $currentFile = $currentData->aggreement_letter_img;
+            $currentData->aggreement_letter_img = NULL;
+            $delete = $currentData->save();
+            if ($delete) {
+                File::delete($currentFile);
+            }
+            return sendResponse([]);
+        } catch (\Throwable $th) {
+            return sendResponse(
+                ['error' => $th->getMessage()],
+                'FAILED',
+                500
+            );
+        }
     }
 }

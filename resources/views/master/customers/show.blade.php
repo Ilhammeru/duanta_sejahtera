@@ -16,6 +16,11 @@
             overflow: hidden;
         }
     </style>
+    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
+    <link
+        href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
+        rel="stylesheet"
+    />
 @endpush
 {{-- end::styles --}}
 
@@ -27,58 +32,7 @@
 @endphp
 
 <div class="row">
-    <div class="col-md-4">
-        <!--begin::Card-->
-        <div class="card mb-5">
-            <div class="card-body">
-                <!--begin::Input group-->
-                <div class="d-flex justify-content-center">
-                    <div class="row">
-                        <!--begin::Col-->
-                        <div class="col-lg-12">
-                            <!--begin::Image input-->
-                            <div class="image-input image-input-outline" data-kt-image-input="true" style="background-image: url({{ asset('images/blank.png') }})">
-                                <!--begin::Preview existing avatar-->
-                                <div class="image-input-wrapper w-250px h-250px" style="background-image: url( {{ asset('images/blank.png') }})"></div>
-                                <!--end::Preview existing avatar-->
-                                <!--begin::Label-->
-                                <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ganti Foto">
-                                    <i class="bi bi-pencil-fill fs-7"></i>
-                                    <!--begin::Inputs-->
-                                    <input type="file" id="inputUserImage" name="avatar" accept="image/jpeg, image/x-png" />
-                                    <input type="hidden" name="avatar_remove" />
-                                    <!--end::Inputs-->
-                                </label>
-                                <!--end::Label-->
-                                <!--begin::Cancel-->
-                                <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Batal">
-                                    <i class="bi bi-x fs-2"></i>
-                                </span>
-                                <!--end::Cancel-->
-                                @if($userImage)
-                                <!--begin::Remove-->
-                                <a href="#" data-toggle="delete-profile-image">
-                                    <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="remove" data-bs-toggle="tooltip" title="Hapus Foto">
-                                        <i class="bi bi-x fs-2"></i>
-                                    </span>
-                                </a>
-                                <!--end::Remove-->
-                                @endif
-                            </div>
-                            <!--end::Image input-->
-                            <!--begin::Hint-->
-                            <div class="form-text">Tipe file yang diperbolehkan: png, jpg, jpeg.</div>
-                            <!--end::Hint-->
-                        </div>
-                        <!--end::Col-->
-                    </div>
-                </div>
-                <!--end::Input group-->
-            </div>
-        </div>
-        <!--end::Card-->
-    </div>
-    <div class="col-md-8">
+    <div class="col-md-12">
         <!--begin::Card-->
         <div class="card mb-5">
             <div class="card-body">
@@ -89,31 +43,7 @@
                     </div>
                 </div>
                 <table class="table table-user">
-                    <tbody>
-                        <tr>
-                            <td>Nama</td>
-                            <td><b id="templateName">{{ $customer->name }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>Email</td>
-                            <td><b id="templateEmail">{{ $customer->email }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>HP</td>
-                            <td><b id="templatePhone">{{ $customer->phone }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>PIC</td>
-                            <td><b id="templatePic">{{ $customer->pic_name . ' - ' . $customer->pic_phone }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>NPWP</td>
-                            <td><b id="templateNpwp">{{ $customer->npwp ?? '-' }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>Alamat</td>
-                            <td> <b id="templateAddress">{{ $completeAddress }}</b> </td>
-                        </tr>
+                    <tbody id="targetPersonalData">
                     </tbody>
                 </table>
             </div>
@@ -130,17 +60,11 @@
                 <div class="row">
                     <div class="d-flex justify-content-between">
                         <h3>Data Layanan</h3>
-                        <a href="#" class="btn btn-light-primary btn-sm"><i class="fas fa-user-edit"></i>Ubah Layanan</a>
+                        <button class="btn btn-light-primary btn-sm" type="button" onclick="changeService({{ $customer->id }})"><i class="fas fa-user-edit"></i>Ubah Layanan</button>
                     </div>
                 </div>
                 <table class="table table-user">
-                    <tbody>
-                        @for ($i = 0; $i < count($customer->services); $i++)
-                            <tr>
-                                <td>Layanan / Service</td>
-                                <td><b>{{  $customer->services[$i]->billing_type_id == 1 ? $customer->services[$i]->service->name . ' - CASH' : $customer->services[$i]->service->name . ' - TEMPO' }}</b></td>
-                            </tr>
-                        @endfor
+                    <tbody id="targetServiceData">
                     </tbody>
                 </table>
             </div>
@@ -154,41 +78,11 @@
                 <div class="row mb-5">
                     <div class="d-flex justify-content-between">
                         <h3>Data Kontrak</h3>
-                        <a href="#" class="btn btn-light-primary btn-sm"><i class="fas fa-user-edit"></i>Ubah</a>
+                        <button type="button" class="btn btn-light-primary btn-sm" onclick="changeContract({{ $customer->id }})"><i class="fas fa-user-edit"></i>Ubah Kontrak</button>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="aggreement-img">
-                            @if ($customer->contract->agreement_letter_img != NULL)
-                                <img src="{{ $customer->contract->agreement_letter_img }}" class="letter-img" alt="">
-                                @else
-                                <img src="{{ asset('/images/document.png') }}" class="letter-img" alt="">
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td>Pembaruhan Otomatis</td>
-                                    <td> <b>{{ $customer->contract->id_auto_renewal == 1 ? 'Ya' : 'Tidak' }}</b> </td>
-                                </tr>
-                                <tr>
-                                    <td>Tanggal Mulai Kontrak</td>
-                                    <td> <b>{{ date('d F Y', strtotime($customer->contract->start_date)) }}</b> </td>
-                                </tr>
-                                <tr>
-                                    <td>Lama Kontrak</td>
-                                    <td> <b>{{ $customer->contract->contract_period_in_day . ' Hari' }}</b> </td>
-                                </tr>
-                                <tr>
-                                    <td>Tanggal Berakhir Kontrak</td>
-                                    <td> <b>{{ date('d F Y', strtotime($customer->contract->end_date)) }}</b> </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="row" id="targetContractData">
+                    
                 </div>
             </div>
         </div>
@@ -227,205 +121,30 @@
     </div>
 </div>
 {{-- end::modal-edit --}}
-
-{{-- begin::modal-photo --}}
-<div class="modal fade" id="userImageModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body pb-5">
-                <div class="image-cropper">
-                    <div id="userImageCropper" style="width: 320px; height: 320px;"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" class="btn btn-primary" data-toggle="upload-image" data-username="userusername">Terapkan</button>
-            </div>
-        </div>
-    </div>
-</div>
-{{-- end::modal-photo --}}
 @endsection
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/croppie.css') }}">
 @endpush
 @push('scripts')
     <script src="{{ asset('js/croppie.min.js') }}"></script>
+    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
     <script>
-        var userImage = null;
-
-        function readUserImageFile(input) {
-        if (input.files && input.files[0]) {
-            $('#userImageModal').modal('show');
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-            setTimeout(function () {
-                userImage = new Croppie(document.getElementById('userImageCropper'), {
-                viewport: {
-                    width: 240,
-                    height: 240,
-                    type: 'square'
-                },
-                boundary: {
-                    width: 320,
-                    height: 320
-                },
-                url: e.target.result,
-                enableExif: true
-                });
-            }, 500);
-            };
-
-            reader.readAsDataURL(input.files[0]);
-        }
-        }
-
-        $('#inputUserImage').on('change', function () {
-            readUserImageFile(this);
-        });
-        $('#userImageModal').on('hide.bs.modal', function (e) {
-            userImage.destroy();
-            $('#inputUserImage').val('');
-        });
-        $('#userImageModal [data-toggle="crop-image"]').on('click', function (e) {
-            userImage.result({
-                type: 'base64',
-                format: 'jpeg',
-                size: {
-                width: 320,
-                height: 320
-                }
-            }).then(function (resp) {
-                $('#userImagePreview img').attr({
-                    src: resp,
-                    'data-upload': true,
-                    'data-filename': $('#inputUserImage')[0].files[0].name
-                });
-                $('[data-toggle="reset-user-image"]').removeClass('d-none');
-                $('#userImageModal').modal('hide');
-            });
-        });
-
-        function resetUserImage() {
-            var $imgTag = $('#userImagePreview img');
-            $imgTag.attr({
-                src: $imgTag.data('original'),
-                'data-upload': false,
-                'data-filename': '',
-                'data-delete': false
-            });
-            $('[data-toggle="reset-user-image"]').addClass('d-none');
-            $('[data-toggle="delete-user-image"]').removeClass('d-none');
-        }
-
-        function deleteUserImage() {
-            var $imgTag = $('#userImagePreview img');
-            $imgTag.attr({
-                src: $imgTag.data('placeholder'),
-                'data-upload': false,
-                'data-filename': '',
-                'data-delete': true
-            });
-            $('[data-toggle="reset-user-image"]').removeClass('d-none');
-            $('[data-toggle="delete-user-image"]').addClass('d-none');
-        }
-
-        $('[data-toggle="reset-user-image"]').click(resetUserImage);
-        $('[data-toggle="delete-user-image"]').click(deleteUserImage);
-
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        $('#userImageModal [data-toggle="upload-image"]').on('click', function (e) {
-            var $this = $(this);
-            userImage.result({
-                type: 'blob',
-                format: 'jpeg',
-                size: {
-                width: 320,
-                height: 320
-                }
-            }).then(function (blob) {
-                var formData = new FormData();
-                formData.append('user_image', blob, $('#inputUserImage')[0].files[0].name);
-                $.ajax({
-                url:  "",
-                data: formData,
-                type: 'POST',
-                contentType: false,
-                processData: false,
-                dataType: 'json',
-                error: function error(response) {
-                    if (response.responseJSON.message) {
-                        iziToast['error']({
-                            message: response.responseJSON.message,
-                            position: "topRight"
-                        });
-                    }
-                },
-                success: function success(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Data berhasil disimpan'
-                    }).then(function (result) {
-                        window.location.reload();
-                    });
-                },
-                });
-                $('#userImageModal').modal('hide');
-            });
-        });
-
-        $('[data-toggle="delete-profile-image"]').click(function (e) {
-            e.preventDefault();
-            var $this = $(this);
-            Swal.fire({
-                title: "Hapus gambar ini?",
-                text: "Gambar akan dihapus selamanya!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batalkan',
-                customClass: {
-                confirmButton: 'btn btn-danger mr-2',
-                cancelButton: 'btn btn-secondary ml-2'
-                },
-                buttonsStyling: false
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                $.ajax({
-                    url: $this.attr('href'),
-                    method: 'POST',
-                    dataType: 'json',
-                    error: function error(response) {
-                        if (response.responseJSON.message) {
-                            iziToast['error']({
-                                message: response.responseJSON.message,
-                                position: "topRight"
-                            });
-                        }
-                    },
-                    success: function success(data, status, xhr) {
-                    window.location.reload();
-                    },
-                });
-                }
-                if(result.isDismissed){
-                    window.location.reload();
-                }
-            });
+        // begin::variable
+        let body = $('#modalEditBody');
+        let modal = $('#modalEdit');
+        let form = $('#formEditCustomer');
+        let customerId = "{{ $customer->id }}";
+        let buttonSave = $('#btnSaveEdit');
+        let varPond = "";
+        // end::variable
+        $(document).ready(function() {
+            initAll(customerId);
         });
 
         // begin::edit-profile
         $('#buttonEditPersonal').on('click', function(e) {
             e.preventDefault();
-            let body = $('#modalEditBody');
-            let modal = $('#modalEdit');
             let id = $(this).data('id');
             let url = "{{ url('/customer/') }}" + "/" + id;
             $.ajax({
@@ -433,12 +152,12 @@
                 url: "{{ url('/customer/edit/form') }}" + '/personal/' + "{{ $id }}",
                 dataType: "json",
                 success: function(res) {
-                    console.log(res);
+                    buttonSave.attr('data-type', 'personal');
                     body.html(res.data.view);
-                    $('#modalTitle').text('Edit Personal Data');
-                    $('#formEditPersonalData').attr('action', url);
-                    $('#formEditPersonalData').attr('method', 'POST');
                     modal.modal('show');
+                    $('#modalTitle').text('Edit Personal Data');
+                    $('#formEditCustomer').attr('action', url);
+                    $('#formEditCustomer').attr('method', 'POST');
                     // init select2 inside the modal
                     $('#editCustomerProvince').select2({
                         dropdownParent: modal
@@ -451,10 +170,122 @@
                     });
                 },
                 error: function(err) {
-                    console.log(err);
+                    handleError(err);
                 }
             })
         });
+
+        function initAll(id) {
+            $.ajax({
+                data: "GET",
+                url: "{{'/customer/init'}}" + "/" + id + "/all",
+                dataType: "json",
+                beforeSend: function() {
+                    let loading = `<div class="text-center">
+                        <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                        </div>
+                        </div>`;
+
+                    $('#targetServiceData').html(loading);
+                    $('#targetPersonalData').html(loading);
+                    $('#targetContractData').html(loading);
+                },
+                success: function(res) {
+                    $('#targetServiceData').html(res.data.service);
+                    $('#targetPersonalData').html(res.data.personal);
+                    $('#targetContractData').html(res.data.contract);
+                },
+                error: function(err) {
+                    console.error(err);
+                }
+            })
+        }
+
+        function initPerType(id, type) {
+            let viewType, idView;
+            if (type == 'service') {
+                viewType = '_init-service';
+                idView = 'targetServiceData';
+            } else if (type == 'personal') {
+                viewType = '_init-personal';
+                idView = 'targetPersonalData';
+            } else {
+                viewType = '_init-contract';
+                idView = 'targetContractData';
+            }
+            $.ajax({
+                data: "GET",
+                url: "{{'/customer/init'}}" + "/" + id + "/" + viewType,
+                dataType: "json",
+                beforeSend: function() {
+                    let loading = `<div class="text-center">
+                        <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                        </div>
+                        </div>`;
+                    
+                    $('#' + idView).html(loading);
+                },
+                success: function(res) {
+                    console.log('res', res);
+                    $('#' + idView).html(res.data.view);
+                },
+                error: function(err) {
+                    console.error('err', err);
+                }
+            })
+        }
+
+        function changeService(id) {
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/customer/change-service') }}" + "/" + id,
+                dataType: "json",
+                success: function(res) {
+                    let url = "{{ url('/customer/change-service') }}" + "/" + id
+                    buttonSave.attr('data-type', 'service');
+                    body.html(res.data.view);
+                    $('#modalTitle').text('Edit Data Layanan');
+                    $('#formEditCustomer').attr('action', url);
+                    $('#formEditCustomer').attr('method', 'POST');
+                    modal.modal('show');
+                }
+            })
+        }
+
+        function changeContract(id) {
+            $.ajax({
+                type: "GET",
+                url: "{{ url('/customer/change-contract') }}" + "/" + id,
+                dataType: "json",
+                success: function(res) {
+                    let url = "{{ url('/customer/change-contract') }}" + "/" + id
+                    buttonSave.attr('data-type', 'contract');
+                    body.html(res.data.view);
+                    $('#modalTitle').text('Edit Data Kontrak');
+                    $('#formEditCustomer').attr('action', url);
+                    $('#formEditCustomer').attr('method', 'POST');
+                    modal.modal('show');
+
+                    let pond = pondFile();
+                    let aggrementImg = res.data.aggrementImg;
+                    if (aggrementImg != "") {
+                        pond.addFile(aggrementImg)
+                    }
+
+                }
+            })
+        }
+
+        function pondFile() {
+            FilePond.registerPlugin(FilePondPluginImagePreview);
+            const pond = FilePond.create(
+                document.getElementById('aggreementLetterPhoto')
+            );
+
+            return pond;
+        }
 
         function changeOnProvince() {
             let province = $('#editCustomerProvince').val();
@@ -506,11 +337,11 @@
         }
 
         function save() {
-            let data = new FormData($('#formEditPersonalData')[0]);
-            let form = $('#formEditPersonalData');
-            let buttonSave = $('#btnSaveEdit');
-            let url = form.attr('action');
-            let method = form.attr('method');
+            let data = new FormData($('#formEditCustomer')[0]);
+            let url = $('#formEditCustomer').attr('action');
+            let method = $('#formEditCustomer').attr('method');
+            let type = buttonSave.data('type');
+
             $.ajax({
                 type: method,
                 url: url,
@@ -523,26 +354,20 @@
                     buttonSave.text('Meyimpan data ...');
                 },
                 success: function(res) {
-                    console.log(res);
                     buttonSave.attr('disabled', false);
                     buttonSave.text('Simpan');
                     iziToast['success']({
                         message: 'Berhasil menyimpan data',
                         position: "topRight"
                     });
-                    $('#templateAddress').html(res.data.address);
-                    $('#templateNpwp').html(res.data.customer.npwp);
-                    $('#templateName').html(res.data.customer.name);
-                    $('#templatePic').html(`${res.data.customer.pic_name} - ${res.data.customer.pic_phone}`);
-                    $('#templatePhone').html(res.data.customer.phone);
-                    $('#templateEmail').html(res.data.customer.email);
-                    $('#modalEdit').modal('hide');
+                    initPerType(customerId, type);
+                    if (type == 'contract') {
+                        initPerType(customerId, 'personal');
+                    }
+                    modal.modal('hide');
                 },
                 error: function(err) {
-                    console.log(err);
-                    buttonSave.attr('disabled', false);
-                    buttonSave.text('Simpan');
-                    handleError(err);
+                    handleError(err, buttonSave);
                 }
             })
         }

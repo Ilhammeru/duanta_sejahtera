@@ -128,7 +128,8 @@
                 {{-- begin::master data --}}
                 <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow([
                         'division.index', 'customers.*',
-                        'services.index', 'services.create'
+                        'services.index', 'services.create',
+                        'container-size-type.*'
                         ]) }}">
                     <span class="menu-link">
                         <span class="menu-icon">
@@ -164,9 +165,44 @@
                                 <span class="menu-title">Customer</span>
                             </a>
                         </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ menuActive(['container-size-type.*']) }}" href="{{ route('container-size-type.index') }}">
+                                <span class="menu-bullet">
+                                    <span class="bullet bullet-dot"></span>
+                                </span>
+                                <span class="menu-title">Kontainer Ukuran / Tipe</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {{-- end::master data --}}
+                {{-- begin::transaction --}}
+                <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow([
+                    'division.index', 'customers.*',
+                    'services.index', 'services.create',
+                    'container-size-type.*'
+                    ]) }}">
+                <span class="menu-link">
+                    <span class="menu-icon">
+                        <!--begin::Svg Icon | path: icons/duotune/finance/fin006.svg-->
+                        <i class="fas fa-sitemap"></i>
+                        <!--end::Svg Icon-->
+                    </span>
+                    <span class="menu-title">Transaksi</span>
+                    <span class="menu-arrow"></span>
+                </span>
+                <div class="menu-sub menu-sub-accordion">
+                    <div class="menu-item">
+                        <a class="menu-link {{ menuActive('division.index') }}" href="{{ route('division.index') }}">
+                            <span class="menu-bullet">
+                                <span class="bullet bullet-dot"></span>
+                            </span>
+                            <span class="menu-title">Booking In</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+                {{-- end::transaction --}}
                 {{-- begin::user management --}}
                 <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow(['roles.index', 'user.index', 'user.create', 'user.show']) }}">
                     <span class="menu-link">
