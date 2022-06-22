@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BookingIn extends Model
 {
@@ -27,7 +29,7 @@ class BookingIn extends Model
         'do_reference',
         'customer_id',
         'container_size_type_id',
-        'is_customer_container_size',
+        'is_custom_container_size',
         'custom_container_size',
         'cargo_goods',
         'volume',
@@ -40,4 +42,39 @@ class BookingIn extends Model
         'is_complete',
         'barcode_path'
     ];
+
+    /**
+     * Define Belongs To relationship to Customer Table
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function customer():BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
+    }
+
+    /**
+     * Define Belongs To relationship to User Table
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function bookedBy():BelongsTo
+    {
+        return $this->belongsTo(User::class, 'booked_by', 'id');
+    }
+
+    /**
+     * Define Belongs To relationship to Service Table
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function service():BelongsTo
+    {
+        return $this->belongsTo(Service::class, 'service_id', 'id');
+    }
+
+    public function containers():HasMany
+    {
+        return $this->hasMany(BookingInContainer::class, 'booking_id', 'id');
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -78,7 +79,6 @@ class UserController extends Controller
             $error = $validate->errors()->all();
             return sendResponse(['error' => $error], 'VALIDATION_FAILED', 500);
         }
-
         $service = new UserService();
         $save = $service->saveUser($request);
 
@@ -132,6 +132,7 @@ class UserController extends Controller
         // get param for validate
         $ruleMessage = $this->getMessageRule();
         $rules = $this->getRule();
+        unset($rules['password']);
 
         $validate = Validator::make($request->all(), $rules, $ruleMessage);
         if ($validate->fails()) {
@@ -168,6 +169,7 @@ class UserController extends Controller
             'division' => 'required',
             'date_in' => 'required',
             'role' => 'required',
+            'password' => 'required'
         ];
 
         return $rules;
@@ -184,8 +186,28 @@ class UserController extends Controller
             'division.required' => 'Divisi harus diisi',
             'date_in.required' => 'Tanggal masuk harus diisi',
             'role.required' => 'Role harus diisi',
+            'password.required' => 'Password harus diisi',
         ];
 
         return $ruleMessage;
+    }
+
+    public function deletePhoto($id) {
+        try {
+            $user = User::find($id);
+            $currentPhoto = $user->photo;
+            $user->photo = NULL;
+            if ($user->save()) {
+                File::delete($currentPhoto);
+            }
+
+            return sendResponse(['user' => $user, 'current' => $currentPhoto]);
+        } catch (\Throwable $th) {
+            return sendResponse(
+                ['error' => $th->getMessage()],
+                'FAILED',
+                500
+            );
+        }
     }
 }

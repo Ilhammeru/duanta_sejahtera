@@ -1,5 +1,10 @@
 @extends('layouts.master')
 
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('plugins/custom/filepond/filepond.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/custom/filepond/plugins-preview.css') }}">
+@endpush
+
 @php
     $urlPost = isset($user) ? route('user.update', $user->id) : route('user.store');
 @endphp
@@ -35,60 +40,37 @@
         <form action="" id="formUser" class="mt-5" enctype="multipart/form-data">
             <div class="form-group row mb-5">
                 <div class="col-md-4 col-xl-4 col-sm-12">
-                    <div class="image-input image-input-outline" data-kt-image-input="true" style="background-image: url({{ asset('images/blank.png') }});">
-                        <!--begin::Preview existing avatar-->
-                        <div class="image-input-wrapper w-250px h-250px" style="background-image: url( {{ !isset($user) ? asset('images/blank.png') : ($user->photo == NULL ? asset('images/blank.png') : asset("storage/$user->photo")) }}); background-size: 100% auto;"></div>
-                        <!--end::Preview existing avatar-->
-                        <!--begin::Label-->
-                        <label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" title="Ganti Foto">
-                            <i class="bi bi-pencil-fill fs-7"></i>
-                            <!--begin::Inputs-->
-                            <input type="file" id="inputUserImage" name="avatar" accept="image/jpeg, image/x-png" />
-                            <input type="hidden" name="avatar_remove" />
-                            <!--end::Inputs-->
-                        </label>
-                        <!--end::Label-->
-                        <!--begin::Cancel-->
-                        <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="cancel" data-bs-toggle="tooltip" title="Batal">
-                            <i class="bi bi-x fs-2"></i>
-                        </span>
-                        <!--end::Cancel-->
-                        @if(isset($user) && $user->photo != NULL)
-                        <!--begin::Remove-->
-                        <a href="" data-toggle="delete-profile-image">
-                            <span class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="remove" data-bs-toggle="tooltip" title="Hapus Foto">
-                                <i class="bi bi-x fs-2"></i>
-                            </span>
-                        </a>
-                        <!--end::Remove-->
-                        @endif
-                    </div>
+                    <input type="file" class="form-control" id="userImage" name="avatar">
                 </div>
                 <div class="col-md-8 col-xl-8 col-sm-12">
                     <div class="form-group row mb-5">
                         <div class="col-md-12 col-xl-12 mb-3">
                             <label for="userName" class="col-form-label required">Nama</label>
-                            <input type="text" class="form-control" id="userName" name="name" value="{{ isset($user) ? $user->name : "" }}">
+                            <input type="text" class="form-control" id="userName" placeholder="Richard Joe" name="name" value="{{ isset($user) ? $user->name : "" }}">
                         </div>
                         <div class="col-md-12 col-xl-12 mb-3">
                             <label for="userEmail" class="col-form-label required">Email</label>
-                            <input type="email" class="form-control" id="userEmail" name="email" value="{{ isset($user) ? $user->email : "" }}">
+                            <input type="email" class="form-control" id="userEmail" placeholder="Richard@gmail.com" name="email" value="{{ isset($user) ? $user->email : "" }}">
                         </div>
                         <div class="col-md-12 col-xl-12 mb-3">
                             <label for="userNik" class="col-form-label required">NIK</label>
-                            <input type="number" class="form-control" id="userNik" name="nik" value="{{ isset($user) ? $user->identity_number : "" }}">
+                            <input type="number" class="form-control" id="userNik" placeholder="3573042323843999" name="nik" value="{{ isset($user) ? $user->identity_number : "" }}">
                         </div>
                     </div>
                 </div>
             </div>
             <div class="form-group row mb-5">
-                <div class="col-md-6 col-xl-6">
+                <div class="col-md-4 col-xl-4">
                     <label for="userBirth" class="col-form-label required">Tanggal Lahir</label>
                     <input type="date" class="form-control" id="userBirth" name="birth_of_date" value="{{ isset($user) ? $user->birth_date : "" }}">
                 </div>
-                <div class="col-md-6 col-xl-6">
+                <div class="col-md-4 col-xl-4">
                     <label for="userPhone" class="col-form-label required">No Telfon</label>
-                    <input type="number" class="form-control" id="userPhone" name="phone" value="{{ isset($user) ? $user->phone : "" }}">
+                    <input type="number" class="form-control" id="userPhone" placeholder="085795327357" name="phone" value="{{ isset($user) ? $user->phone : "" }}">
+                </div>
+                <div class="col-md-4 col-xl-4">
+                    <label for="userPassword" class="col-form-label required">Password</label>
+                    <input type="password" class="form-control" id="userPassword" placeholder="Kosongkan Bila Tidak Diganti" name="password">
                 </div>
             </div>
 
@@ -98,7 +80,7 @@
 
             <div class="form-group mb-5 row">
                 <div class="col-md-4 col-xl-4">
-                    <label for="userDivision" class="col-form-label">Divisi</label>
+                    <label for="userDivision" class="col-form-label required">Divisi</label>
                     <select name="division" id="userDivision" class="form-control form-select" data-placeholder="- Pilih Divisi -">
                         <option value="">- Pilih Divisi -</option>
                         @foreach ($division as $item)
@@ -134,48 +116,62 @@
 @endsection
 
 @push('scripts')
-<script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-</script>
-@endpush
-
-@push('scripts')
+    <script src="{{ asset('plugins/custom/filepond/filepond.js') }}"></script>
+    <script src="{{ asset('plugins/custom/filepond/plugins-preview.js') }}"></script>
     <script>
-        var userImage = null;
+        let issetUser = "{{ isset($user) }}";
+        let userAvatar = "{{ isset($user) ? $user->photo : '' }}";
+        let userAvatarOnImg = "{{ isset($user) ? asset($user->photo) : '' }}";
+        let elemAvatar = document.querySelector('#userImage');
 
-        function resetUserImage() {
-            var $imgTag = $('#userImagePreview img');
-            $imgTag.attr({
-                src: $imgTag.data('original'),
-                'data-upload': false,
-                'data-filename': '',
-                'data-delete': false
-            });
-            $('[data-toggle="reset-user-image"]').addClass('d-none');
-            $('[data-toggle="delete-user-image"]').removeClass('d-none');
+        FilePond.registerPlugin(FilePondPluginImagePreview);
+        const userPond = FilePond.create(elemAvatar);
+        if (userAvatar == "") {
+            userPond.addFile("{{ asset('images/blank.png') }}");
+        } else {
+            userPond.addFile(userAvatarOnImg);
         }
 
-        function deleteUserImage() {
-            var $imgTag = $('#userImagePreview img');
-            $imgTag.attr({
-                src: $imgTag.data('placeholder'),
-                'data-upload': false,
-                'data-filename': '',
-                'data-delete': true
+        if (userAvatar != "") {
+            document.querySelector('#userImage').addEventListener('FilePond:removefile', (e) => {
+                Swal.fire({
+                    title: 'Apakah anda yakin ingin menghapus foto ini?',
+                    showDenyButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'Ya!',
+                    denyButtonText: `Batalkan`,
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "DELETE",
+                            url: "{{ url('/users/photo') }}" + '/' + "{{ isset($user) ? $user->id : '' }}",
+                            dataType: 'json',
+                            error: function(err) {
+                                console.log(err);
+                                handleError(err);
+                            },
+                            success: function(res) {
+                                console.log(res);
+                                iziToast['success']({
+                                    message: 'Foto berhasil di hapus',
+                                    position: "topRight"
+                                });
+                                window.location.href = "{{ url('/users/') }}" + "/" + "{{ isset($user) ? $user->id : '' }}"
+                            }
+                        })
+                    } else {
+                        userPond.addFile(userAvatarOnImg);
+                    }
+                })
             });
-            $('[data-toggle="reset-user-image"]').removeClass('d-none');
-            $('[data-toggle="delete-user-image"]').addClass('d-none');
         }
 
-        $('[data-toggle="reset-user-image"]').click(resetUserImage);
-        $('[data-toggle="delete-user-image"]').click(deleteUserImage);
 
         function save() {
-            let data = new FormData(document.getElementById('formUser'));
+            let data = new FormData($('#formUser')[0]);
+            let avatarFile = userPond.getFile();
+            data.append('avatar', avatarFile.file);
             let elem = $('.btn-save');
             $.ajax({
                 type: "POST",
@@ -189,6 +185,7 @@
                     elem.text('Menyimpan data ...');
                 },
                 success: function(res) {
+                    console.log(res);
                     elem.attr('disabled', false);
                     elem.text('Simpan');
                     iziToast['success']({

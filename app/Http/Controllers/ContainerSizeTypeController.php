@@ -65,8 +65,8 @@ class ContainerSizeTypeController extends Controller
 
         // validation
         $rules = [
-            'size' => 'required|unique:container_size_and_type,size',
-            'type' => 'required|unique:container_size_and_type,type',
+            'size' => 'required',
+            'type' => 'required',
         ];
         $messageRules = [
             'size.required' => 'Ukuran Harus Diisi',

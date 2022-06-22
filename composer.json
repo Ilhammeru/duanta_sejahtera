@@ -14,7 +14,7 @@
         "laravel/tinker": "^2.7",
         "laravel/ui": "^3.4",
         "phpmailer/phpmailer": "^6.6",
-        "simplesoftwareio/simple-qrcode": "^4.2",
+        "simplesoftwareio/simple-qrcode": "~4",
         "torann/hashids": "^3.0",
         "yajra/laravel-datatables-oracle": "^9.19"
     },

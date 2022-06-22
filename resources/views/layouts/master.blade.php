@@ -20,6 +20,12 @@
 	<link href="{{ asset('css/datatables.min.css') }}" rel="stylesheet" type="text/css" />
 	{{-- <link href="{{ asset('css/select2.min.css') }}" rel="stylesheet" type="text/css" /> --}}
 	<!--end::Page Vendor Stylesheets-->
+
+	<style>
+		.helper-label {
+			color: #8D8D8D;
+		}
+	</style>
 	@stack('styles')
 
     {{-- <!-- Styles -->

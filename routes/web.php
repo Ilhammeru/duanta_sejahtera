@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingInController;
 use App\Http\Controllers\ContainerSizeTypeController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Master\DivisionController;
@@ -97,8 +98,14 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     // end::role
     // begin::user
     Route::get('/user/json', [UserController::class, 'json'])->name('user.json');
+    Route::delete('/users/photo/{id}', [UserController::class, 'deletePhoto'])->name('user.delete.photo');
     Route::post('/user/{id}', [UserController::class, 'update'])->name('user.update');
-    Route::resource('user', UserController::class);
+    // Route::get('user.in', UserController::class);
+    Route::get('/users', [UserController::class, 'index'])->name("user.index");
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('user.show');
+    Route::post('/users/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('/users/create', [UserController::class, 'create'])->name('user.create');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     // end::user
     // begin::customer
     Route::get('/customers/json', [CustomerController::class, 'json'])->name('customers.json');
@@ -118,4 +125,10 @@ Route::group(['middleware' => ['auth', 'role:admin']], function() {
     Route::resource('services', ServiceController::class);
     Route::post('/services/update/{id}', [ServiceController::class, 'update'])->name('services.update');
     // end::services
+    // begin::booking-in
+    Route::get('/booking-in/json', [BookingInController::class, 'json'])->name('booking-in.json');
+    Route::get('/booking-in/detail-container/{id}', [BookingInController::class, 'detailContainer'])->name('booking-in.detailContainer');
+    Route::get('/booking-in/print-container/{id}', [BookingInController::class, 'printContainerView'])->name('booking-in.printContainerView');
+    Route::resource('booking-in', BookingInController::class);
+    // end::booking-in
 });

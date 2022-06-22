@@ -7,7 +7,7 @@
         <div class="text-end">
             <button class="btn btn-light-primary" onclick="addDivision()">
                 <i class="fa fa-plus"></i>
-                Tambah Divisi
+                Tambah
             </button>
         </div>
     </div>

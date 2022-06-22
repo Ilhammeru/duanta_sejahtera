@@ -188,7 +188,7 @@
             if (result.isConfirmed) {
                 $.ajax({
                     type: "DELETE",
-                    url: "{{ url('/user/') }}" + '/' + id,
+                    url: "{{ url('/users/') }}" + '/' + id,
                     dataType: 'json',
                     error: function(err) {
                         console.log(err);

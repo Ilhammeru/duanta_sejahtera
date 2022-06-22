@@ -178,9 +178,7 @@
                 {{-- end::master data --}}
                 {{-- begin::transaction --}}
                 <div data-kt-menu-trigger="click" class="menu-item menu-accordion {{ menuShow([
-                    'division.index', 'customers.*',
-                    'services.index', 'services.create',
-                    'container-size-type.*'
+                    'booking-in.*'
                     ]) }}">
                 <span class="menu-link">
                     <span class="menu-icon">
@@ -193,7 +191,7 @@
                 </span>
                 <div class="menu-sub menu-sub-accordion">
                     <div class="menu-item">
-                        <a class="menu-link {{ menuActive('division.index') }}" href="{{ route('division.index') }}">
+                        <a class="menu-link {{ menuActive('booking-in.*') }}" href="{{ route('booking-in.index') }}">
                             <span class="menu-bullet">
                                 <span class="bullet bullet-dot"></span>
                             </span>

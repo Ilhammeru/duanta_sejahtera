@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('booking_time')->nullable();
             $table->string('do_reference')->nullable();
             $table->integer('customer_id');
-            $table->integer('container_size_type_id');
+            $table->integer('container_size_type_id')->nullable();
             $table->string('is_customer_container_size')->nullable();
             $table->string('custom_container_size')->nullable();
             $table->string('cargo_goods')->nullable();

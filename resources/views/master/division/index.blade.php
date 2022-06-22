@@ -78,11 +78,6 @@
 
 @push('scripts')
 <script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
 
     var _columns = [{
         data: "name"

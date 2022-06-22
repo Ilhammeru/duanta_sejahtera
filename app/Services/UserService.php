@@ -16,6 +16,7 @@ class UserService {
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'password' => Hash::make($request->password),
             'birth_date' => $request->birth_of_date,
             'date_in' => $request->date_in,
             'division_id' => $request->division,
@@ -28,14 +29,16 @@ class UserService {
         DB::beginTransaction();
         try {
             // save image if exist
-            if ($request->hasFile('avatar')) {
-                $image = $request->file('avatar');
-                $name = date('Ymd') . "_User_." . $image->getClientOriginalExtension();
-
-                $filePath = Storage::putFileAs('public/user', $image, $name);
-
-                if ($filePath) {
-                    $data['photo'] = 'user/' . $name;
+            if ($request->has('avatar') || $request->avatar != null) {
+                $image = $request->avatar;
+                if ($image->getClientOriginalName() != 'blob') {
+                    $name = date('Ymd') . "_User_." . $image->getClientOriginalExtension();
+    
+                    $filePath = $image->storeAs('user', $name, 'public');
+    
+                    if ($filePath) {
+                        $data['photo'] = 'user/' . $name;
+                    }
                 }
             }
 
