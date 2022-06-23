@@ -28,7 +28,7 @@
                             <select name="booked_by" id="bookedBy" class="form-select form-control">
                                 <option value="">- Pilih Marketing -</option>
                                 @foreach ($marketing as $item)
-                                    <option {{ $item->user->id == $bookingIn->booked_by ? 'selected' : '' }} value="{{ $item->user->id }}">{{ $item->user->name }}</option>
+                                    <option {{ $bookingIn->booked_by == $item->user->id ? 'selected' : '' }} value="{{ $item->user->id }}">{{ $item->user->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -52,108 +52,9 @@
                         <select name="customer_id" id="customerId" class="form-select form-control">
                             <option value="">- Pilih Customer -</option>
                             @foreach ($customers as $customer)
-                                <option {{ $customer->id == $bookingIn->customer_id ? 'selected' : '' }} value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                <option {{ $bookingIn->customer_id == $customer->id ? 'selected' : '' }} value="{{ $customer->id }}">{{ $customer->name }}</option>
                             @endforeach
                         </select>
-                    </div>
-                </div>
-                <div class="form-group row mb-5">
-                    <div class="col-md-4">
-                        <label for="checkboxContainer" class="col-form-label p-0"><i>Container Size</i></label>
-                        <p class="mb-0 helper-label">
-                            <i>Container Size</i> tidak boleh kosong. 
-                            <br>
-                            Pilih Salah Satu
-                        </p>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="row" style="margin-top: 10px;">
-                            @for ($a = 0; $a < count($containerSize); $a++)
-                                <div class="col-md-3 mb-5">
-                                    <div class="form-check">
-                                        <input {{ $bookingIn->container_size_type_id == $containerSize[$a]->id ? 'checked' : '' }} class="form-check-input checkboxContainer" name="container_size" onchange="checkContainer({{ $a+1 }})" type="checkbox" id="checkboxContainer{{ $a+1 }}" value="{{ $containerSize[$a]->id }}">
-                                        <label class="form-check-label" for="checkboxContainer{{ $a+1 }}">{{ $containerSize[$a]->size . ' ' . $containerSize[$a]->type }}</label>
-                                    </div>
-                                </div>
-                            @endfor
-                            <div class="col-md-3 mb-5">
-                                <div class="form-check">
-                                    <input {{ $bookingIn->is_customer_container_size ? 'checked' : '' }} class="form-check-input checkboxContainer" name="container_size" onchange="checkContainer({{ count($containerSize) + 1 }})" type="checkbox" id="checkboxContainer{{ count($containerSize) + 1 }}" value="custom">
-                                    <label class="form-check-label" for="checkboxContainer{{ count($containerSize) + 1 }}">Other</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group row mb-5" id="rowCustomSize" {{ $bookingIn->is_customer_container_size ? '' : 'hidden' }}>
-                    <div class="col-md-4">
-                        <label for="customSize" class="col-form-label p-0">Custom Container Size / Type</label>
-                        <p class="mb-0 helper-label">
-                            Detail Custom Container Size / Type
-                        </p>
-                    </div>
-                    <div class="col-md-8">
-                        <input type="text" value="{{ $bookingIn->custom_container_size }}" name="custom_size" placeholder="20 GP" class="form-control" id="customSize">
-                    </div>
-                </div>
-                <div class="form-group row mb-5">
-                    <div class="col-md-4">
-                        <label for="checkboxCargoGoods" class="col-form-label p-0"><i>Cargo / Goods</i></label>
-                        <p class="mb-0 helper-label">
-                            <i>Cargo / Goods</i> tidak boleh kosong. 
-                            <br>
-                            Pilih Salah Satu
-                        </p>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="row" style="margin-top: 10px;">
-                            @for ($a = 0; $a < count($cargoGoods); $a++)
-                                <div class="col-md-4 mb-5">
-                                    <div class="form-check">
-                                        <input {{ $bookingIn->cargo_goods == $cargoGoods[$a]['id'] ? 'checked' : '' }} class="form-check-input checkboxCargoGoods" name="cargo_goods" onchange="checkCargoGoods({{ $a+1 }})" type="checkbox" id="checkboxCargoGoods{{ $a+1 }}" value="{{ $cargoGoods[$a]['id'] }}">
-                                        <label class="form-check-label" for="checkboxCargoGoods{{ $a+1 }}">{{ $cargoGoods[$a]['name'] }}</label>
-                                    </div>
-                                </div>
-                            @endfor
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group row mb-5">
-                    <div class="col-md-4">
-                        <label for="volume" class="col-form-label p-0">Volume</label>
-                        <p class="mb-0 helper-label">
-                            Volume tidak boleh kosong.
-                        </p>
-                    </div>
-                    <div class="col-md-8">
-                        <input type="text" name="volume" value="{{ $bookingIn->volume }}" placeholder="100" class="form-control" id="volume">
-                    </div>
-                </div>
-                <div class="form-group row mb-5">
-                    <div class="col-md-4">
-                        <label for="services" class="col-form-label p-0">Data Layanan</label>
-                        <p class="mb-0 helper-label">
-                            Pilih Layanan dan Jenis Pembayaran
-                        </p>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <select name="service_id" id="services" class="form-control form-select">
-                                    <option value="">- Pilih Layanan -</option>
-                                    @foreach ($service as $item)
-                                        <option {{ $item->id == $bookingIn->service_id ? 'selected' : '' }} value="{{ $item->id }}">{{ $item->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <select name="billing_type" id="billingType" class="form-control form-select">
-                                    <option value="">- Pilih Jenis Pembayaran -</option>
-                                    <option {{ $bookingIn->billing_type_id == 1 ? 'selected' : '' }} value="1">CASH</option>
-                                    <option {{ $bookingIn->billing_type_id == 2 ? 'selected' : '' }} value="2">TEMPO</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="form-group row mb-5">
@@ -164,26 +65,75 @@
                         </p>
                     </div>
                     <div class="col-md-8">
-                        @for ($a = 0; $a < count($bookingIn->containers); $a++)
-                            <div class="row mb-3 rowContainerNumbers" id="rowContainerNumbers{{ $a+1 }}">
-                                <div class="col-md-5">
-                                    <input type="text" value="{{ $bookingIn->containers[$a]->container_number }}" placeholder="Container Number" name="container_numbers[]" class="form-control" id="containerNumbers1">
-                                </div>
-                                <div class="col-md-5">
-                                    <input type="text" value="{{ $bookingIn->containers[$a]->container_seal }}" placeholder="Container Seal" name="container_seals[]" class="form-control" id="containerNumbers1">
-                                </div>
-                                <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                    <div>
-                                        <i class="fas fa-times text-danger" onclick="deleteContainerNumbers({{ $a+1 }})" style="cursor: pointer;"></i>
+                        @for($i = 0; $i < count($bookingIn->containers); $i++)
+                        <div style="position: relative; z-index: 100;" id="rowContainerNumbers{{ $i+1 }}">
+                            <span style="position: absolute; z-index: 101; top: -10px; right: -5px; cursor: pointer;" onclick="deleteContainerNumbers({{ $i+1 }})"><i class="fas fa-times text-danger fa-2x"></i></span>
+                            <div class="card card-flush bg-secondary mb-5">
+                                <div class="card-body">
+                                    <div class="row mb-4 rowContainerNumbers">
+                                        <div class="col-md-5">
+                                            <input type="text" placeholder="Container Number" value="{{ $bookingIn->containers[$i]->container_number }}" name="containers[0][container_number]" class="form-control" id="containerNumbers1">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="text" placeholder="Container Seal" value="{{ $bookingIn->containers[$i]->container_seal }}" name="containers[0][container_seal]" class="form-control" id="containerNumbers1">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" name="containers[0][volume]" value="{{ $bookingIn->containers[$i]->volume }}" placeholder="Volume" class="form-control" id="volume">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <h5 class="mb-3 mt-3">Contaier Size / Type</h5>
+                                        @for ($a = 0; $a < count($containerSize); $a++)
+                                            <div class="col-md-3 mb-5">
+                                                <div class="form-check">
+                                                    <input class="form-check-input checkboxContainer" name="containers[0][container_size_type_id]" onchange="checkContainer({{ $a+1 }}1,1)" type="checkbox" 
+                                                        id="checkboxContainer{{ $a+1 }}1" {{ $bookingIn->containers[$i]->container_size_type_id == $containerSize[$a]->id ? 'checked' : '' }} value="{{ $containerSize[$a]->id }}">
+                                                    <label class="form-check-label" for="checkboxContainer{{ $a+1 }}1">{{ $containerSize[$a]->size . ' ' . $containerSize[$a]->type }}</label>
+                                                </div>
+                                            </div>
+                                        @endfor
+                                        <div class="col-md-3 mb-5">
+                                            <div class="form-check">
+                                                <input class="form-check-input checkboxContainer" name="containers[0][container_size_type_id]" onchange="checkContainer({{ count($containerSize) + 1 }}1,1)"
+                                                    type="checkbox" id="checkboxContainer{{ count($containerSize) + 1 }}1" {{ $bookingIn->containers[$i]->container_size_type_id == null ? 'checked' : '' }} value="custom">
+                                                <label class="form-check-label" for="checkboxContainer{{ count($containerSize) + 1 }}1">Other</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4" id="rowCustomSize1" {{ $bookingIn->containers[$i]->is_customer_container_size ? '' : 'hidden' }}>
+                                        <h5 class="mb-3 mt-3">Custom Contaier Size / Type</h5>
+                                        <div class="col-md-12">
+                                            <input type="text" name="containers[0][custom_container_size]" value="{{ $bookingIn->containers[$i]->custom_container_size }}" placeholder="20 GP" class="form-control" id="customSize">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <h5 class="mb-3 mt-3">Cargo / Goods</h5>
+                                        @for ($a = 0; $a < count($cargoGoods); $a++)
+                                            <div class="col-md-4 mb-5">
+                                                <div class="form-check">
+                                                    <input class="form-check-input checkboxCargoGoods" name="containers[0][cargo_goods]" onchange="checkCargoGoods({{ $a+1 }}1,1)"
+                                                        type="checkbox" id="checkboxCargoGoods{{ $a+1 }}1" {{ $bookingIn->containers[$i]->cargo_goods == $cargoGoods[$a]['id'] ? 'checked' : '' }} value="{{ $cargoGoods[$a]['id'] }}">
+                                                    <label class="form-check-label" for="checkboxCargoGoods{{ $a+1 }}1">{{ $cargoGoods[$a]['name'] }}</label>
+                                                </div>
+                                            </div>
+                                        @endfor
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         @endfor
                         <div id="targetContainerNumbers"></div>
-                        <button class="btn btn-light-primary btn-sm" type="button" onclick="addContainerNumbers()">
-                            <i class="fas fa-plus me-3"></i>
-                            Tambah
-                        </button>
+
+                        <div class="row">
+                            <div class="col">
+                                <div>
+                                    <button class="btn btn-sm btn-light-success" type="button" onclick="addContainerNumbers()">
+                                        <i class="fas fa-plus me-3" style="cursor: pointer;"></i>
+                                        Tambah Containers
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group row mb-5">
@@ -208,28 +158,29 @@
         $('#services').select2();
         $('#billingType').select2();
 
-        function checkContainer(ids) {
+        function checkContainer(ids, index) {
+            console.log(ids);
             let checkbox = $('.checkboxContainer');
 
             for (let a = 0; a < checkbox.length; a++) {
-                $('#checkboxContainer' + (a+1)).prop('checked', false);
+                $('#checkboxContainer' + (a+1) + index).prop('checked', false);
             }
             $('#checkboxContainer' + ids).prop('checked', true);
 
             let val = $('#checkboxContainer' + ids).val();
             if (val == 'custom') {
-                $('#rowCustomSize').attr('hidden', false);
+                $('#rowCustomSize' + index).attr('hidden', false);
             } else {
                 $('#customSize').val('');
-                $('#rowCustomSize').attr('hidden', true);
+                $('#rowCustomSize' + index).attr('hidden', true);
             }
         }
 
-        function checkCargoGoods(ids) {
+        function checkCargoGoods(ids, index) {
             let checkbox = $('.checkboxCargoGoods');
 
             for (let a = 0; a < checkbox.length; a++) {
-                $('#checkboxCargoGoods' + (a+1)).prop('checked', false);
+                $('#checkboxCargoGoods' + (a+1) + index).prop('checked', false);
             }
             $('#checkboxCargoGoods' + ids).prop('checked', true);
         }
@@ -237,18 +188,61 @@
         function addContainerNumbers() {
             let rows = $('.rowContainerNumbers');
             let a = (rows.length + 1);
-            div = `<div class="row mb-3 rowContainerNumbers" id="rowContainerNumbers${(a + 1)}">
-                    <div class="col-md-5">
-                        <input type="text" placeholder="Container Number" name="container_numbers[]" class="form-control" id="containerNumbers${a + 1}">
-                    </div>
-                    <div class="col-md-5">
-                        <input type="text" placeholder="Container Seal" name="container_seals[]" class="form-control" id="containerNumbers${a + 1}">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        <div>
-                            <i class="fas fa-times text-danger" onclick="deleteContainerNumbers('${(a + 1)}')" style="cursor: pointer;"></i>
+            let b = rows.length;
+            div = `<div style="position: relative; z-index: 100;" id="rowContainerNumbers${a}">
+                        <span style="position: absolute; z-index: 101; top: -10px; right: -5px; cursor: pointer;" onclick="deleteContainerNumbers(${a})"><i class="fas fa-times text-danger fa-2x"></i></span>
+                        <div class="card card-flush bg-secondary mb-5">
+                            <div class="card-body">
+                                <div class="row mb-4 rowContainerNumbers">
+                                    <div class="col-md-5">
+                                        <input type="text" placeholder="Container Number" name="containers[${b}][container_number]" class="form-control" id="containerNumbers1">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="text" placeholder="Container Seal" name="containers[${b}][container_seal]" class="form-control" id="containerNumbers1">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" name="containers[${b}][volume]" placeholder="Volume" class="form-control" id="volume">
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <h5 class="mb-3 mt-3">Contaier Size / Type</h5>
+                                    @for ($a = 0; $a < count($containerSize); $a++)
+                                        <div class="col-md-3 mb-5">
+                                            <div class="form-check">
+                                                <input class="form-check-input checkboxContainer" name="containers[${b}][container_size_type_id]" onchange="checkContainer({{ $a+1 }}${a}, ${a})"
+                                                    type="checkbox" id="checkboxContainer{{ $a+1 }}${a}" value="{{ $containerSize[$a]->id }}">
+                                                <label class="form-check-label" for="checkboxContainer{{ $a+1 }}${a}">{{ $containerSize[$a]->size . ' ' . $containerSize[$a]->type }}</label>
+                                            </div>
+                                        </div>
+                                    @endfor
+                                    <div class="col-md-3 mb-5">
+                                        <div class="form-check">
+                                            <input class="form-check-input checkboxContainer" name="containers[${b}][container_size_type_id]" onchange="checkContainer({{ count($containerSize) + 1 }}${a}, ${a})"
+                                                type="checkbox" id="checkboxContainer{{ count($containerSize) + 1 }}${a}" value="custom">
+                                            <label class="form-check-label" for="checkboxContainer{{ count($containerSize) + 1 }}${a}">Other</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-4" id="rowCustomSize${a}" hidden>
+                                    <h5 class="mb-3 mt-3">Custom Contaier Size / Type</h5>
+                                    <div class="col-md-12">
+                                        <input type="text" name="containers[${b}][custom_container_size]" placeholder="20 GP" class="form-control" id="customSize">
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <h5 class="mb-3 mt-3">Cargo / Goods</h5>
+                                    @for ($a = 0; $a < count($cargoGoods); $a++)
+                                        <div class="col-md-4 mb-5">
+                                            <div class="form-check">
+                                                <input class="form-check-input checkboxCargoGoods" name="containers[${b}][cargo_goods]" onchange="checkCargoGoods({{ $a+1 }}${a},${a})"
+                                                    type="checkbox" id="checkboxCargoGoods{{ $a+1 }}${a}" value="{{ $cargoGoods[$a]['id'] }}">
+                                                <label class="form-check-label" for="checkboxCargoGoods{{ $a+1 }}${a}">{{ $cargoGoods[$a]['name'] }}</label>
+                                            </div>
+                                        </div>
+                                    @endfor
+                                </div>
+                            </div>
                         </div>
-                    </div>
                     </div>`;
 
             $('#targetContainerNumbers').append(div);
@@ -259,7 +253,7 @@
             let rowLen = row.length;
             if (rowLen == 1) {
                 iziToast['error']({
-                    message: 'Container setidaknya mempunya 1 nilai',
+                    message: 'Setidaknya Pilih 1 Container',
                     position: "topRight"
                 });
             } else {
@@ -271,7 +265,6 @@
             let data = $('#formBookingIn').serialize();
             let url = $('#formBookingIn').attr('action');
             let btnSave = $('#btnSave');
-            let id = "{{ $bookingIn->id }}";
 
             $.ajax({
                 type: "PUT",
@@ -282,13 +275,14 @@
                     btnSave.text('Menyimpan Data ...');
                 },
                 success: function(res) {
+                    console.log(res);
                     btnSave.attr('disabled', false);
                     btnSave.text('Simpan');
                     iziToast['success']({
                         message: 'Berhasil menyimpan data',
                         position: "topRight"
                     });
-                    window.location.href = "{{ url('/booking-in') }}" + "/" + id + "/edit";
+                    window.location.href = "{{ route('booking-in.index') }}";
                 },
                 error: function(err) {
                     btnSave.attr('disabled', false);

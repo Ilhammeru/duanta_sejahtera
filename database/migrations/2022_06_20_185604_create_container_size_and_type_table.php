@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('container_size_and_type', function (Blueprint $table) {
-            $table->id();
+            $table->id()->autoIncrement();
             $table->string('size')->nullable();
             $table->string('type')->nullable();
             $table->timestamps();

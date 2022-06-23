@@ -28,9 +28,6 @@
                     <th>Nama Customer</th>
                     <th>Waktu Booking</th>
                     <th>Marketing</th>
-                    <th>Layanan</th>
-                    <th>Cara Bayar</th>
-                    <th>Volume</th>
                     <th>Jumlah Container</th>
                     <th></th>
                 </tr>
@@ -50,8 +47,8 @@
 <!--end::Card-->
 
 {{-- begin::modal --}}
-<div class="modal fade" id="modalDetailContainer" tabindex="-1">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalDetailContainer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitle"></h5>
@@ -84,12 +81,6 @@
         data: "booking_time"
     }, {
         data: "booked_by"
-    }, {
-        data: "service_id"
-    }, {
-        data: "billing_type_id"
-    }, {
-        data: "volume"
     }, {
         data: "containers"
     }, {

@@ -28,17 +28,21 @@ class BookingInController extends Controller
         $this->rules = [
             'booking_time' => 'required',
             'customer_id' => 'required',
-            'volume' => 'required',
-            'service_id' => 'required',
-            'custom_size' => 'required_with:is_custom_size'
+            'containers.*.container_number' => 'required',
+            'containers.*.container_seal' => 'required',
+            'containers.*.volume' => 'required',
+            'containers.*.cargo_goods' => 'required',
+            'containers.*.container_size_type_id' => 'required',
         ];
         $this->messageRules = [
             'booking_time.required' => 'Waktu Booking Harus Diisi',
             'customer_id.required' => 'Customer Harus Diisi',
-            'volume.required' => 'Volum Kontainer Harus Diisi',
             'booked_by.required' => 'Marketing Harus Diisi',
-            'service_id.required' => 'Layanan Harus Diisi',
-            'custom_size.required_with' => 'Detail Ukuran Custom Harus Diisi Jika Anda Memilih Ukuran Custom'
+            'containers.*.container_number.required' => 'Nomor Containers Harus Diisi',
+            'containers.*.container_seal.required' => 'Seal Containers Harus Diisi',
+            'containers.*.volume.required' => 'Volume Containers Harus Diisi',
+            'containers.*.cargo_goods.required' => 'Cargo / Goods Harus Diisi',
+            'containers.*.container_size_type_id.required' => 'Container Size / Type Harus Diisi',
         ];
     }
 
@@ -66,19 +70,13 @@ class BookingInController extends Controller
             ->get();
         return DataTables::of($data)
             ->editColumn('customer_id', function($data) {
-                return ucwords($data->customer->name);
+                return '<a href="'. route('booking-in.show', $data->id) .'">'. ucwords($data->customer->name) .'</a>';
             })
             ->editColumn('booking_time', function($data) {
                 return date('d F Y', strtotime($data->booking_time));
             })
             ->editColumn('booked_by', function($data){
                 return ucwords($data->bookedBy->name);
-            })
-            ->editColumn('service_id', function($data){
-                return ucwords($data->service->name);
-            })
-            ->editColumn('billing_type_id', function($data) {
-                return $data->billing_type_id == 1 ? 'CASH' : 'TEMPO';
             })
             ->addColumn('containers', function($data) {
                 return '<span style="cursor:pointer; color: #006dab;" onclick="detailContainer('. $data->id .')">'. count($data->containers) .' <i class="fas fa-link ms-3" style=" color: #006dab;"></i></span>';
@@ -88,7 +86,7 @@ class BookingInController extends Controller
                     <span class="me-2" style="cursor:pointer;" onclick="deleteBooking('. $data->id .')"><i class="fas fa-trash"></i></span>
                     <span style="cursor:pointer;" onclick="printBooking('. $data->id .')"><i class="fas fa-print"></i></span>';
             })
-            ->rawColumns(['customer_id', 'booking_time', 'booked_by', 'service_id', 'billing_type_id', 'containers', 'action'])
+            ->rawColumns(['customer_id', 'booking_time', 'booked_by', 'containers', 'action'])
             ->make(true);
     }
 
@@ -155,27 +153,29 @@ class BookingInController extends Controller
                 500
             );
         }
+
+        $containers = $request->containers;
+        for ($v = 0; $v < count($containers); $v++) {
+            if ($containers[$v]['container_size_type_id'] == 'custom') {
+                if ($containers[$v]['custom_container_size'] == NULL) {
+                    return sendResponse(
+                        ['error' => ['Custom Size Harus Diisi']],
+                        'VALIDATION_FAILED',
+                        500
+                    );
+                }
+            }
+        }
         // end::validation
-        DB::beginTransaction();
+        Db::beginTransaction();
         try {
             // variable;
             $bookingTime = $request->booking_time;
             $doReference = $request->do_reference;
             $customerId = $request->customer_id;
-            $containerSize = $request->container_size;
-            $isCustomSize = $request->is_custom_size;
-            $customSize = $request->custom_size;
-            $cargoGoods = $request->cargo_goods;
-            $volume = $request->volume;
             $notes = $request->notes;
             $bookedBy = $request->booked_by;
-            $billingType = $request->billing_type;
             $acceptBy = $request->accept_by;
-            $transportCompany = $request->transport_company;
-            $transportPlateNumber = $request->transport_plate_number;
-            $serviceId = $request->service_id;
-            $containerNumbers = $request->container_numbers;
-            $containerSeals = $request->container_seals;
             $bookingCode = generateBookingCode(BookingIn::count(), $customerId, 'IN');
 
             $customerDetail = Customer::find($customerId);
@@ -188,33 +188,23 @@ class BookingInController extends Controller
                 'booking_time' => $bookingTime,
                 'do_reference' => $doReference,
                 'customer_id' => $customerId,
-                'container_size_type_id' => $containerSize,
-                'cargo_goods' => $cargoGoods,
-                'volume' => $volume,
                 'notes' => $notes,
                 'booked_by' => $bookedBy,
-                'transport_company' => $transportCompany,
-                'transport_plate_number' => $transportPlateNumber,
-                'service_id' => $serviceId,
-                'billing_type_id' => $billingType,
                 'barcode_path' => 'booking-in/' . $noSpaceCustomerName . '.svg'
             ];
-            
-            if ($isCustomSize) {
-                $data['is_custom_container_size'] = $isCustomSize;
-                $data['custom_container_size'] = $customSize;
-            }
             $bookingInId = BookingIn::insertGetId($data);
 
-            $dataContainer = [];
-            for ($a = 0; $a < count($containerNumbers); $a++) {
-                $dataContainer[] = [
-                    'booking_id' => $bookingInId,
-                    'container_number' => $containerNumbers[$a],
-                    'container_seal' => $containerSeals[$a]
-                ];
+            for ($a = 0; $a < count($containers); $a++) {
+                $containers[$a]['booking_id'] = $bookingInId;
+                $containers[$a]['created_at'] = Carbon::now();
+                if ($containers[$a]['container_size_type_id'] == 'custom') {
+                    $containers[$a]['is_customer_container_size'] = true;
+                    $containers[$a]['container_size_type_id'] = NULL;
+                } else {
+                    $containers[$a]['is_customer_container_size'] = false;
+                }
             }
-            BookingInContainer::insert($dataContainer);
+            BookingInContainer::insert($containers);
             DB::commit();
             return sendResponse([]);
         } catch (\Throwable $th) {
@@ -233,9 +223,12 @@ class BookingInController extends Controller
      * @param  \App\Models\BookingIn  $bookingIn
      * @return \Illuminate\Http\Response
      */
-    public function show(BookingIn $bookingIn)
+    public function show($id)
     {
-        //
+        $pageTitle = 'Detail Booking In';
+        $bookingIn = BookingIn::with(['containers.sizeType', 'bookedBy', 'customer'])
+            ->find($id);
+        return view('transactions.booking-in.show', compact('bookingIn', 'pageTitle'));
     }
 
     /**
@@ -286,7 +279,11 @@ class BookingInController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $role = getRole();
         // begin::validation
+        if ($role == 'admin') {
+            $this->rules['booked_by'] = 'required';
+        }
         $validation = Validator::make(
             $request->all(),
             $this->rules,
@@ -300,65 +297,54 @@ class BookingInController extends Controller
                 500
             );
         }
+
+        $containers = $request->containers;
+        for ($v = 0; $v < count($containers); $v++) {
+            if ($containers[$v]['container_size_type_id'] == 'custom') {
+                if ($containers[$v]['custom_container_size'] == NULL) {
+                    return sendResponse(
+                        ['error' => ['Custom Size Harus Diisi']],
+                        'VALIDATION_FAILED',
+                        500
+                    );
+                }
+            }
+        }
         // end::validation
-        DB::beginTransaction();
+        Db::beginTransaction();
         try {
             // variable;
-            $bookingCode = $request->booking_code;
             $bookingTime = $request->booking_time;
             $doReference = $request->do_reference;
             $customerId = $request->customer_id;
-            $containerSize = $request->container_size;
-            $isCustomSize = $containerSize == 'custom' ? true : false;
-            $customSize = $request->custom_size;
-            $cargoGoods = $request->cargo_goods;
-            $volume = $request->volume;
             $notes = $request->notes;
             $bookedBy = $request->booked_by;
-            $billingType = $request->billing_type;
             $acceptBy = $request->accept_by;
-            $transportCompany = $request->transport_company;
-            $transportPlateNumber = $request->transport_plate_number;
-            $serviceId = $request->service_id;
-            $containerNumbers = $request->container_numbers;
-            $containerSeals = $request->container_seals;
 
             $data = [
                 'booking_time' => $bookingTime,
                 'do_reference' => $doReference,
                 'customer_id' => $customerId,
-                'container_size_type_id' => $containerSize,
-                'cargo_goods' => $cargoGoods,
-                'volume' => $volume,
                 'notes' => $notes,
                 'booked_by' => $bookedBy,
-                'transport_company' => $transportCompany,
-                'transport_plate_number' => $transportPlateNumber,
-                'service_id' => $serviceId,
-                'billing_type_id' => $billingType,
-                'is_customer_container_size' => NULL,
-                'custom_container_size' => NULL,
-                'updated_at' => Carbon::now()
+                'updated_at' => Carbon::now(),
+                'created_at' => Carbon::now(),
             ];
-            
-            if ($isCustomSize) {
-                $data['is_customer_container_size'] = $isCustomSize;
-                $data['custom_container_size'] = $customSize;
-                $data['container_size_type_id'] = NULL;
-            }
-
             BookingIn::where('id', $id)->update($data);
 
-            $dataContainer = [];
-            for ($a = 0; $a < count($containerNumbers); $a++) {
-                $dataContainer[] = [
-                    'booking_id' => $id,
-                    'container_number' => $containerNumbers[$a],
-                    'container_seal' => $containerSeals[$a]
-                ];
+            for ($a = 0; $a < count($containers); $a++) {
+                $containers[$a]['booking_id'] = $id;
+                $containers[$a]['updated_at'] = Carbon::now();
+                $containers[$a]['created_at'] = Carbon::now();
+                if ($containers[$a]['container_size_type_id'] == 'custom') {
+                    $containers[$a]['is_customer_container_size'] = true;
+                    $containers[$a]['container_size_type_id'] = NULL;
+                } else {
+                    $containers[$a]['is_customer_container_size'] = false;
+                }
             }
             BookingInContainer::where('booking_id', $id)->delete();
-            BookingInContainer::insert($dataContainer);
+            BookingInContainer::insert($containers);
             DB::commit();
             return sendResponse([]);
         } catch (\Throwable $th) {
@@ -398,7 +384,7 @@ class BookingInController extends Controller
     public function detailContainer($id)
     {
         try {
-            $bookingIn = BookingIn::with(['containers'])->find($id);
+            $bookingIn = BookingIn::with(['containers.sizeType'])->find($id);
             $containers = $bookingIn->containers;
             $view = view('transactions.booking-in._detail-container', compact('containers'))->render();
     

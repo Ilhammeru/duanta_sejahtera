@@ -19,11 +19,6 @@ return new class extends Migration
             $table->timestamp('booking_time')->nullable();
             $table->string('do_reference')->nullable();
             $table->integer('customer_id');
-            $table->integer('container_size_type_id')->nullable();
-            $table->string('is_customer_container_size')->nullable();
-            $table->string('custom_container_size')->nullable();
-            $table->string('cargo_goods')->nullable();
-            $table->integer('volume')->default(0);
             $table->text('notes')->nullable();
             $table->integer('booked_by');
             $table->integer('accept_by')->nullable();

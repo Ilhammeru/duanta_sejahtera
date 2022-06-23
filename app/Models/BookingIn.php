@@ -28,17 +28,13 @@ class BookingIn extends Model
         'booking_time',
         'do_reference',
         'customer_id',
-        'container_size_type_id',
-        'is_custom_container_size',
-        'custom_container_size',
-        'cargo_goods',
-        'volume',
         'notes',
         'booked_by',
         'accept_by',
         'transport_company',
         'transport_plate_number',
         'service_id',
+        'billing_type_id',
         'is_complete',
         'barcode_path'
     ];

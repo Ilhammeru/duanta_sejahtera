@@ -18,6 +18,11 @@ return new class extends Migration
             $table->integer('booking_id');
             $table->string('container_number')->nullable();
             $table->string('container_seal')->nullable();
+            $table->string('cargo_goods')->nullable();
+            $table->integer('container_size_type_id')->nullable();
+            $table->string('is_customer_container_size')->nullable();
+            $table->string('custom_container_size')->nullable();
+            $table->integer('volume')->default(0);
             $table->timestamps();
         });
     }
